@@ -31,7 +31,27 @@ type BalanceResponse struct {
 	Balance float64 `json:"balance"`
 }
 
-type EmptyResponse struct {
+func TransferMoney(from *User, to *User, amount float64) (err error) {
+
+	transaction := db.Begin()
+
+	from.Balance -= amount
+	err = db.Save(from).Error
+	if err != nil {
+		transaction.Rollback()
+		return err
+	}
+
+	to.Balance += amount
+	err = db.Save(to).Error
+	if err != nil {
+		transaction.Rollback()
+		return err
+	}
+
+	transaction.Commit()
+
+	return nil
 }
 
 func jsonResponse(w http.ResponseWriter, data interface{}, statusCode int) {
@@ -95,7 +115,7 @@ func depositMoneyHandler(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.ParseInt(userId, 10, 0)
 
 	user := &User{Identifier: int(id)}
-	db.Where(user).First(user)
+	db.Where(user).FirstOrCreate(user)
 
 	if user.ID == 0 {
 		user.Name = "new"
@@ -159,7 +179,10 @@ func transferMoneyHandler(w http.ResponseWriter, r *http.Request) {
 	value, _ := strconv.ParseFloat(amount, 64)
 
 	fromUser := &User{Identifier: int(fromId)}
-	db.Where(fromUser).First(fromUser)
+	err := db.Where(fromUser).First(fromUser).Error
+	if err != nil {
+		panic(err)
+	}
 
 	if fromUser.ID == 0 {
 		jsonResponse(w, &ValidationErrorResponse{Message: "Sender user does not exist"}, 404)
@@ -179,13 +202,13 @@ func transferMoneyHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fromUser.Balance -= value
-	db.Save(fromUser)
+	err = TransferMoney(fromUser, toUser, value)
+	if err != nil {
+		jsonResponse(w, "Could not transfer money", 500)
+		return
+	}
 
-	toUser.Balance += value
-	db.Save(toUser)
-
-	jsonResponse(w, EmptyResponse{}, 200)
+	jsonResponse(w, fromUser, 200)
 }
 
 func main() {
