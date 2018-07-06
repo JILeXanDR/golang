@@ -3,12 +3,9 @@ package main
 import (
 	"net/http"
 	"log"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
 	database "github.com/JILeXanDR/golang/db"
 	handlers "github.com/JILeXanDR/golang/http_handlers"
 )
-
-// TODO Данные необходимо хранить в postgresql. Реализовать валидацию. В случае любой ошибки валидации отдавать 422 ошибку.
 
 func main() {
 

@@ -10,7 +10,7 @@ import (
 func TransferMoney(fromId int, toId int, amount float64) (internalErr error, myErr error) {
 
 	if fromId == toId {
-		return nil, errors.New("Could not transfer money beetwen same accounts")
+		return nil, ErrSameAccounts
 	}
 
 	// get sender user
@@ -24,7 +24,7 @@ func TransferMoney(fromId int, toId int, amount float64) (internalErr error, myE
 
 	// check balance
 	if sender.Balance < amount {
-		return nil, errors.New("Not enough money")
+		return nil, ErrNotEnoughMoney
 	}
 
 	// get recipient user

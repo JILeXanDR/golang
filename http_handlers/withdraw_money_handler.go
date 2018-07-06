@@ -26,7 +26,7 @@ func WithdrawMoneyHandler(w http.ResponseWriter, r *http.Request) {
 		if err == gorm.ErrRecordNotFound {
 			common.JsonMessageResponse(w, "User does not exist", 400)
 		} else {
-			common.HandleError(w, err)
+			common.HandleInternalError(w, err)
 		}
 		return
 	}
@@ -34,14 +34,14 @@ func WithdrawMoneyHandler(w http.ResponseWriter, r *http.Request) {
 	value, _ := strconv.ParseFloat(amount, 64)
 
 	if user.Balance < value {
-		common.JsonMessageResponse(w, "Not enough money", 400)
+		common.JsonMessageResponse(w, common.ErrNotEnoughMoney.Error(), 400)
 		return
 	}
 
 	user.Balance -= value
 	err = db.Connection.Save(user).Error
 	if err != nil {
-		common.HandleError(w, err)
+		common.HandleInternalError(w, err)
 		return
 	}
 

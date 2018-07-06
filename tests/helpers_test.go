@@ -1,7 +1,37 @@
 package tests
 
-import "testing"
+import (
+	"testing"
+	"github.com/JILeXanDR/golang/common"
+	"github.com/JILeXanDR/golang/db"
+)
 
-func TestJsonResponse(t *testing.T) {
-	//t.Errorf("Failed")
+func TestTransferMoneyWithoutBalance(t *testing.T) {
+
+	db.Connect()
+	defer db.Connection.Close()
+
+	var sender = 1
+	var recipient = 2
+	var amount = float64(1001)
+
+	_, myErr := common.TransferMoney(sender, recipient, amount)
+	if myErr == nil || myErr != common.ErrNotEnoughMoney {
+		t.Error("No errors even if money is not enough")
+	}
+}
+
+func TestTransferMoneyBetweenSameAccounts(t *testing.T) {
+
+	db.Connect()
+	defer db.Connection.Close()
+
+	var sender = 1
+	var recipient = 1
+	var amount = float64(20)
+
+	_, myErr := common.TransferMoney(sender, recipient, amount)
+	if myErr == nil || myErr != common.ErrSameAccounts {
+		t.Error("No errors for operation between same accounts")
+	}
 }

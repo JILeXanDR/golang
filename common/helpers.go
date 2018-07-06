@@ -3,6 +3,7 @@ package common
 import (
 	"net/http"
 	"encoding/json"
+	"errors"
 )
 
 func JsonResponse(w http.ResponseWriter, data interface{}, statusCode int) {
@@ -16,12 +17,12 @@ func JsonResponse(w http.ResponseWriter, data interface{}, statusCode int) {
 	w.Write(body)
 }
 
-func HandleError(w http.ResponseWriter, err error) {
+func HandleInternalError(w http.ResponseWriter, err error) {
 	JsonMessageResponse(w, err.Error(), 500)
 }
 
 func InternalServerError(w http.ResponseWriter) {
-	JsonMessageResponse(w, "Internal Server Error", 500)
+	HandleInternalError(w, errors.New("Internal Server Error"))
 }
 
 func ValidationError(w http.ResponseWriter, message string) {
