@@ -3,15 +3,31 @@ package db
 import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"log"
 )
 
 var Connection *gorm.DB
 
-func GetUserBalance(userId int) (float64) {
+func GetUserBalance(userId int) (res float64, err error) {
 	var user = &User{}
-	Connection.Where(&User{Identifier: userId}).First(user)
+	err = Connection.Where(&User{Identifier: userId}).First(user).Error
+	if err != nil {
+		return 0, err
+	}
 
-	return user.Balance
+	return user.Balance, nil
+}
+
+func sender(channel chan string) {
+	channel <- "ping"
+	channel <- "ping"
+	channel <- "ping"
+}
+
+func receiver(channel chan string) {
+	for {
+		log.Println(<-channel)
+	}
 }
 
 func Connect() {
@@ -22,6 +38,15 @@ func Connect() {
 	}
 
 	Connection = db
+
+	var channel = make(chan string)
+
+	log.Println("before")
+
+	go sender(channel)
+	go receiver(channel)
+
+	log.Println("after")
 
 	//Connection.LogMode(true)
 

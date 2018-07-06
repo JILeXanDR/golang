@@ -42,18 +42,18 @@ func TestSuccessfulMoneyTransfer(t *testing.T) {
 	defer db.Connection.Close()
 
 	var (
-		senderId               = 1
-		recipientId            = 2
-		amount                 = 100.0
-		senderInitialAmount    = db.GetUserBalance(senderId)
-		recipientInitialAmount = db.GetUserBalance(recipientId)
+		senderId                  = 1
+		recipientId               = 2
+		amount                    = 100.0
+		senderInitialAmount, _    = db.GetUserBalance(senderId)
+		recipientInitialAmount, _ = db.GetUserBalance(recipientId)
 	)
 
 	common.TransferMoney(senderId, recipientId, amount)
 
 	var (
-		senderFinalAmount    = db.GetUserBalance(senderId)
-		recipientFinalAmount = db.GetUserBalance(recipientId)
+		senderFinalAmount, _    = db.GetUserBalance(senderId)
+		recipientFinalAmount, _ = db.GetUserBalance(recipientId)
 	)
 
 	if ((senderInitialAmount - amount) != senderFinalAmount) || ((recipientInitialAmount + amount) != recipientFinalAmount) {
