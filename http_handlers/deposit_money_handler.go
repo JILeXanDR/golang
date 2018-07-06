@@ -40,11 +40,11 @@ func DepositMoneyHandler(w http.ResponseWriter, r *http.Request) {
 			user.Balance = 0
 			err := db.Connection.Create(user).Error
 			if err != nil {
-				common.HandleInternalError(w, err)
+				common.HandleError(w, err)
 				return
 			}
 		} else {
-			common.HandleInternalError(w, err)
+			common.HandleError(w, err)
 			return
 		}
 	}
@@ -54,7 +54,7 @@ func DepositMoneyHandler(w http.ResponseWriter, r *http.Request) {
 	user.Balance += value
 	err = db.Connection.Save(user).Error
 	if err != nil {
-		common.HandleInternalError(w, err)
+		common.HandleError(w, err)
 		return
 	}
 

@@ -7,6 +7,13 @@ import (
 
 var Connection *gorm.DB
 
+func GetUserBalance(userId int) (float64) {
+	var user = &User{}
+	Connection.Where(&User{Identifier: userId}).First(user)
+
+	return user.Balance
+}
+
 func Connect() {
 
 	db, err := gorm.Open("postgres", "host=localhost port=5432 user=golang dbname=golang password=golang")

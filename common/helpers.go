@@ -17,12 +17,12 @@ func JsonResponse(w http.ResponseWriter, data interface{}, statusCode int) {
 	w.Write(body)
 }
 
-func HandleInternalError(w http.ResponseWriter, err error) {
+func HandleError(w http.ResponseWriter, err error) {
 	JsonMessageResponse(w, err.Error(), 500)
 }
 
 func InternalServerError(w http.ResponseWriter) {
-	HandleInternalError(w, errors.New("Internal Server Error"))
+	HandleError(w, errors.New("Internal Server Error"))
 }
 
 func ValidationError(w http.ResponseWriter, message string) {

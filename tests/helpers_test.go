@@ -35,3 +35,29 @@ func TestTransferMoneyBetweenSameAccounts(t *testing.T) {
 		t.Error("No errors for operation between same accounts")
 	}
 }
+
+func TestSuccessfulMoneyTransfer(t *testing.T) {
+
+	db.Connect()
+	defer db.Connection.Close()
+
+	var (
+		senderId               = 1
+		recipientId            = 2
+		amount                 = 100.0
+		senderInitialAmount    = db.GetUserBalance(senderId)
+		recipientInitialAmount = db.GetUserBalance(recipientId)
+	)
+
+	common.TransferMoney(senderId, recipientId, amount)
+
+	var (
+		senderFinalAmount    = db.GetUserBalance(senderId)
+		recipientFinalAmount = db.GetUserBalance(recipientId)
+	)
+
+	if ((senderInitialAmount - amount) != senderFinalAmount) || ((recipientInitialAmount + amount) != recipientFinalAmount) {
+		t.Error("Bad calculation")
+		return
+	}
+}

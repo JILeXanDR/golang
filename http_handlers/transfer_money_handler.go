@@ -27,17 +27,12 @@ func TransferMoneyHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if value <= 0 {
-		common.JsonMessageResponse(w, "Amount should be greater than 0 and and integer", 424)
-		return
-	}
-
 	internalErr, logicErr := common.TransferMoney(int(fromId), int(toId), value)
 	if internalErr != nil {
 		common.InternalServerError(w)
 		return
 	} else if logicErr != nil {
-		common.HandleInternalError(w, logicErr)
+		common.HandleError(w, logicErr)
 		return
 	}
 

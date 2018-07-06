@@ -9,6 +9,10 @@ import (
 // transfer money from one user to another user
 func TransferMoney(fromId int, toId int, amount float64) (internalErr error, myErr error) {
 
+	if amount <= 0 {
+		return nil, errors.New("Amount should be greater than 0")
+	}
+
 	if fromId == toId {
 		return nil, ErrSameAccounts
 	}
