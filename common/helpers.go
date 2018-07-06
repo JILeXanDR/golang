@@ -1,0 +1,33 @@
+package common
+
+import (
+	"net/http"
+	"encoding/json"
+)
+
+func JsonResponse(w http.ResponseWriter, data interface{}, statusCode int) {
+	body, err := json.Marshal(data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(statusCode)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(body)
+}
+
+func HandleError(w http.ResponseWriter, err error) {
+	JsonMessageResponse(w, err.Error(), 500)
+}
+
+func InternalServerError(w http.ResponseWriter) {
+	JsonMessageResponse(w, "Internal Server Error", 500)
+}
+
+func ValidationError(w http.ResponseWriter, message string) {
+	JsonMessageResponse(w, message, 422)
+}
+
+func JsonMessageResponse(w http.ResponseWriter, message string, code int) {
+	JsonResponse(w, map[string]string{"message": message}, code)
+}
