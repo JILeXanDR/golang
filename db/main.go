@@ -4,6 +4,8 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"log"
+	"os"
+	"fmt"
 )
 
 var Connection *gorm.DB
@@ -30,11 +32,20 @@ func receiver(channel chan string) {
 	}
 }
 
-func Connect() {
+func Connect() (err error) {
 
-	db, err := gorm.Open("postgres", "host=localhost port=5432 user=golang dbname=golang password=golang")
+	var conn = fmt.Sprintf(
+		"host=%v port=%v user=%v dbname=%v password=%v",
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_NAME"),
+		os.Getenv("DB_PASSWORD"),
+	)
+
+	db, err := gorm.Open("postgres", conn)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	Connection = db
@@ -48,12 +59,16 @@ func Connect() {
 
 	log.Println("after")
 
-	//Connection.LogMode(true)
+	Connection.LogMode(true)
 
-	Connection.DropTableIfExists(&User{})
-	Connection.AutoMigrate(&User{})
+	var models = []interface{}{&User{}, &Order{}}
+
+	Connection.DropTableIfExists(models...)
+	Connection.AutoMigrate(models...)
 
 	Connection.Create(&User{Identifier: 1, Name: "Alexandr", Balance: 1000})
 	Connection.Create(&User{Identifier: 2, Name: "Bob", Balance: 1000})
 	Connection.Create(&User{Identifier: 3, Name: "Test", Balance: 1000})
+
+	return nil
 }

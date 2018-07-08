@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SimpleShopping</title>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
+
+<template id="template_app">
+    <div>
+        <h1>Сервис работает в тестовом режиме!</h1>
+        <order-form></order-form>
+    </div>
+</template>
+
+<template id="template_order-form">
+    <div>
+        <form @submit.prevent="add()">
+            <fieldset>
+                <legend>Покупки</legend>
+                <input type="text" v-model.trim="item" placeholder="Товар">
+                <button type="submit" :disabled="!item.length">Добавить</button>
+                <ol v-if="form.list.length">
+                    <li v-for="item in form.list">{{ item }}
+                        <button @click="remove(item)">удалить</button>
+                    </li>
+                </ol>
+                <h4 v-else>В списке заказов пусто</h4>
+            </fieldset>
+        </form>
+        <div v-if="form.list.length">
+            <fieldset>
+                <legend>Получатель</legend>
+                <p>
+                    <input type="text" name="phone" v-model="form.phone" placeholder="Номер телефона">
+                </p>
+                <p>
+                    <input type="text" name="address" v-model="form.delivery_address" placeholder="Адрес доставки">
+                </p>
+            </fieldset>
+        </div>
+        <fieldset>
+            <legend>Оплата</legend>
+            По получению
+        </fieldset>
+        <p>
+            <button @click="confirm()" :disabled="!isFormValid()">Подтвердить заказ</button>
+        </p>
+    </div>
+</template>
+
+<script>
+
+    var App = Vue.component('app', {
+        template: '#template_app',
+        data: function () {
+            return {}
+        }
+    });
+
+    Vue.component('order-form', {
+        template: '#template_order-form',
+        data: function () {
+            return {
+                item: '',
+                form: {
+                    list: [],
+                    phone: '',
+                    delivery_address: '',
+                },
+            }
+        },
+        created() {
+            this.sync();
+        },
+        methods: {
+            add() {
+                this.form.list.push(this.item);
+                this.item = '';
+            },
+            remove(item) {
+                var index = this.form.list.indexOf(item);
+                this.form.list.splice(index, 1);
+            },
+            confirm() {
+                this.$http.post('/order', this.form).then(function (res) {
+
+                }).catch(function (err) {
+                    console.log(err.body);
+                });
+            },
+            sync() {
+
+                var cached = {};
+
+                try {
+                    cached = JSON.parse(window.localStorage.getItem('form'))
+                } catch (e) {
+                }
+
+                for (var key in cached) {
+                    if (this.form.hasOwnProperty(key)) {
+                        this.form[key] = cached[key];
+                    }
+                }
+            },
+            isFormValid() {
+                return this.form.list.length && this.form.phone && this.form.delivery_address;
+            }
+        },
+        watch: {
+            form: {
+                handler: function () {
+                    window.localStorage.setItem('form', JSON.stringify(this.form));
+                },
+                deep: true
+            },
+        }
+    });
+
+    new Vue({
+        el: '#app',
+        render: function (createElement) {
+            return createElement(App)
+        }
+    })
+</script>
+
+</body>
+</html>
