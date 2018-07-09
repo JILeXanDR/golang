@@ -2,57 +2,139 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
     <title>SimpleShopping</title>
 </head>
 <body>
 
 <div id="app"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
-
 <template id="template_app">
-    <div>
-        <h1>Сервис работает в тестовом режиме!</h1>
-        <order-form></order-form>
-    </div>
+    <v-app>
+        <v-content>
+            <v-jumbotron>
+                <v-container fill-height>
+                    <v-layout align-center>
+                        <v-flex>
+                            <h3 class="display-3">Welcome to the site</h3>
+
+                            <span class="subheading">Lorem ipsum dolor sit amet, pri veniam forensibus id. Vis maluisset molestiae id, ad semper lobortis cum. At impetus detraxit incorrupte usu, repudiare assueverit ex eum, ne nam essent vocent admodum.</span>
+
+                            <v-divider class="my-3"></v-divider>
+
+
+                        </v-flex>
+                    </v-layout>
+                </v-container>
+            </v-jumbotron>
+            <order-form></order-form>
+        </v-content>
+    </v-app>
+
 </template>
 
 <template id="template_order-form">
     <div>
-        <form @submit.prevent="add()">
-            <fieldset>
-                <legend>Покупки</legend>
-                <input type="text" v-model.trim="item" placeholder="Товар">
-                <button type="submit" :disabled="!item.length">Добавить</button>
-                <ol v-if="form.list.length">
-                    <li v-for="item in form.list">{{ item }}
-                        <button @click="remove(item)">удалить</button>
-                    </li>
-                </ol>
-                <h4 v-else>В списке заказов пусто</h4>
-            </fieldset>
-        </form>
-        <div v-if="form.list.length">
-            <fieldset>
-                <legend>Получатель</legend>
-                <p>
-                    <input type="text" name="phone" v-model="form.phone" placeholder="Номер телефона">
-                </p>
-                <p>
-                    <input type="text" name="address" v-model="form.delivery_address" placeholder="Адрес доставки">
-                </p>
-            </fieldset>
-        </div>
-        <fieldset>
-            <legend>Оплата</legend>
-            По получению
-        </fieldset>
-        <p>
-            <button @click="confirm()" :disabled="!isFormValid()">Подтвердить заказ</button>
-        </p>
+
+        <v-form @submit.prevent="add()">
+            <v-flex xs12 sm6 md3>
+                <v-text-field label="Solo" placeholder="Товар" solo v-model.trim="item"></v-text-field>
+            </v-flex>
+
+            <v-btn outline color="indigo" type="submit" :disabled="!item.length">Добавить</v-btn>
+
+            <v-list two-line subheader v-if="form.list.length">
+                <v-subheader inset>Товары</v-subheader>
+
+                <v-list-tile
+                        v-for="item in form.list"
+                        :key="item"
+                        avatar
+                        @click="remove(item)"
+                >
+                    <v-list-tile-avatar>
+                        <v-icon class="grey lighten-1 white--text">folder</v-icon>
+                    </v-list-tile-avatar>
+
+                    <v-list-tile-content>
+                        <v-list-tile-title>{{ item }}</v-list-tile-title>
+                    </v-list-tile-content>
+
+                    <v-list-tile-action>
+                        <v-btn icon ripple>
+                            <v-icon color="grey lighten-1">info</v-icon>
+                        </v-btn>
+                    </v-list-tile-action>
+                </v-list-tile>
+
+            </v-list>
+
+            <h4 v-else>В списке заказов пусто</h4>
+        </v-form>
+
+        <v-form v-if="form.list.length">
+            <v-container>
+                <v-layout row wrap>
+
+                    <v-flex xs12 sm6>
+                        <v-text-field v-model="form.phone" label="Номер телефона" outline></v-text-field>
+                    </v-flex>
+
+                    <v-flex xs12 sm6>
+                        <v-text-field v-model="form.delivery_address" label="Адрес доставки" outline></v-text-field>
+                    </v-flex>
+
+                </v-layout>
+            </v-container>
+        </v-form>
+
+        <template>
+            <div class="text-xs-center">
+                <v-btn
+                        :disabled="dialog"
+                        :loading="dialog"
+                        outline
+                        color="indigo"
+                        @click="confirm()"
+                        :disabled="!isFormValid()"
+                >
+                    Подтвердить заказ
+                </v-btn>
+
+                <v-dialog
+                        v-model="dialog"
+                        hide-overlay
+                        persistent
+                        width="300"
+                >
+                    <v-card
+                            color="primary"
+                            dark
+                    >
+                        <v-card-text>
+                            Please stand by
+                            <v-progress-linear
+                                    indeterminate
+                                    color="white"
+                                    class="mb-0"
+                            ></v-progress-linear>
+                        </v-card-text>
+                    </v-card>
+                </v-dialog>
+            </div>
+        </template>
+
     </div>
 </template>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
+<script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js"></script>
 
 <script>
 
@@ -73,6 +155,7 @@
                     phone: '',
                     delivery_address: '',
                 },
+                dialog: false,
             }
         },
         created() {
@@ -88,11 +171,14 @@
                 this.form.list.splice(index, 1);
             },
             confirm() {
+                this.dialog = true;
                 this.$http.post('/order', this.form).then(function (res) {
 
                 }).catch(function (err) {
                     console.log(err.body);
-                });
+                }).finally(function () {
+                    this.dialog = false;
+                })
             },
             sync() {
 
@@ -119,6 +205,12 @@
                     window.localStorage.setItem('form', JSON.stringify(this.form));
                 },
                 deep: true
+            },
+            watch: {
+                dialog(val) {
+                    if (!val) return;
+                    setTimeout(() => (this.dialog = false), 4000)
+                }
             },
         }
     });
