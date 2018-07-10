@@ -59,7 +59,9 @@ func Connect() (err error) {
 
 	log.Println("after")
 
-	Connection.LogMode(true)
+	if os.Getenv("DB_LOG_MODE_ENABLED") == "true" {
+		Connection.LogMode(true)
+	}
 
 	var models = []interface{}{&User{}, &Order{}}
 

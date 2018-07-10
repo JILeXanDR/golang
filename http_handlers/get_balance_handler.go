@@ -9,7 +9,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-type balanceResponse struct {
+type BalanceResponse struct {
 	Balance float64 `json:"balance"`
 }
 
@@ -39,5 +39,5 @@ func GetBalanceHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	common.JsonResponse(w, balanceResponse{Balance: user.Balance}, 200)
+	common.JsonResponse(w, BalanceResponse{Balance: user.Balance}, 200)
 }

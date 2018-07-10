@@ -4,12 +4,12 @@ import (
 	"testing"
 	"github.com/JILeXanDR/golang/common"
 	"github.com/JILeXanDR/golang/db"
+	"github.com/JILeXanDR/golang/app"
 )
 
 func TestTransferMoneyWithoutBalance(t *testing.T) {
 
-	db.Connect()
-	defer db.Connection.Close()
+	app.CreateTest()
 
 	var sender = 1
 	var recipient = 2
@@ -23,8 +23,7 @@ func TestTransferMoneyWithoutBalance(t *testing.T) {
 
 func TestTransferMoneyBetweenSameAccounts(t *testing.T) {
 
-	db.Connect()
-	defer db.Connection.Close()
+	app.CreateTest()
 
 	var sender = 1
 	var recipient = 1
@@ -38,8 +37,7 @@ func TestTransferMoneyBetweenSameAccounts(t *testing.T) {
 
 func TestSuccessfulMoneyTransfer(t *testing.T) {
 
-	db.Connect()
-	defer db.Connection.Close()
+	app.CreateTest()
 
 	var (
 		senderId                  = 1
