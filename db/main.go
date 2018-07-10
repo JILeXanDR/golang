@@ -5,6 +5,8 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"os"
 	"fmt"
+	"encoding/json"
+	"github.com/jinzhu/gorm/dialects/postgres"
 )
 
 var Connection *gorm.DB
@@ -17,6 +19,39 @@ func GetUserBalance(userId int) (res float64, err error) {
 	}
 
 	return user.Balance, nil
+}
+
+func migrations() {
+
+	var models = []interface{}{&User{}, &Order{}}
+
+	Connection.DropTableIfExists(models...)
+	Connection.AutoMigrate(models...)
+
+	// test users
+	Connection.Create(&User{Identifier: 1, Name: "Alexandr", Balance: 1000})
+	Connection.Create(&User{Identifier: 2, Name: "Bob", Balance: 1000})
+	Connection.Create(&User{Identifier: 3, Name: "Test", Balance: 1000})
+
+	var list = []string{
+		"Латте апельсиновый (фабрика кофе)",
+		"мак-меню",
+	}
+
+	metadata, err := json.Marshal(list)
+	if err != nil {
+		panic(err)
+	}
+
+	// test orders
+	Connection.Create(&Order{
+		Phone:           "0939411685",
+		DeliveryAddress: "Добровольського 6",
+		Comment:         "4 подъезд квартира 117",
+		Name:            "Саша",
+		Status:          STATUS_CREATED,
+		List:            postgres.Jsonb{metadata},
+	})
 }
 
 func Connect() (err error) {
@@ -41,14 +76,7 @@ func Connect() (err error) {
 		Connection.LogMode(true)
 	}
 
-	var models = []interface{}{&User{}, &Order{}}
-
-	Connection.DropTableIfExists(models...)
-	Connection.AutoMigrate(models...)
-
-	Connection.Create(&User{Identifier: 1, Name: "Alexandr", Balance: 1000})
-	Connection.Create(&User{Identifier: 2, Name: "Bob", Balance: 1000})
-	Connection.Create(&User{Identifier: 3, Name: "Test", Balance: 1000})
+	migrations()
 
 	return nil
 }

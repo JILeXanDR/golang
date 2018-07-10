@@ -44,6 +44,7 @@ Vue.component('order-form', {
     },
     created() {
         this.sync();
+        this.search = this.form.delivery_address;
     },
     methods: {
         add() {
@@ -101,14 +102,12 @@ Vue.component('order-form', {
             deep: true
         },
         search(val) {
-            // Items have already been loaded
-            if (this.items.length > 0) return;
 
             this.isLoading = true;
 
-            // Lazily load input items
-            this.$http.get('/find-address?q=' + val)
+            this.$http.get('/find-address', {params: {q: val}})
                 .then(res => {
+                    console.log(res.data);
                     this.items = res.data;
                 })
                 .catch(err => {
