@@ -13,49 +13,59 @@
 
 <template id="template_app">
     <v-app>
-        <v-content>
-            <v-jumbotron>
-                <v-container fill-height>
-                    <v-layout align-center>
-                        <v-flex>
-                            <h3 class="display-3">Welcome to the site</h3>
-
-                            <span class="subheading">Lorem ipsum dolor sit amet, pri veniam forensibus id. Vis maluisset molestiae id, ad semper lobortis cum. At impetus detraxit incorrupte usu, repudiare assueverit ex eum, ne nam essent vocent admodum.</span>
-
-                            <v-divider class="my-3"></v-divider>
-
-
-                        </v-flex>
-                    </v-layout>
-                </v-container>
-            </v-jumbotron>
-            <order-form></order-form>
-        </v-content>
+        <v-container grid-list-md text-xs-center>
+            <v-layout row wrap>
+                <v-flex xs12>
+                    <order-form></order-form>
+                </v-flex>
+            </v-layout>
+        </v-container>
+        <v-footer height="auto" color="primary lighten-1">
+            <v-layout justify-center row wrap>
+                <div>&copy; {{ new Date().getFullYear() }}</div>
+            </v-layout>
+        </v-footer>
     </v-app>
-
 </template>
 
 <template id="template_order-form">
     <div>
 
-        <v-form @submit.prevent="add()">
-            <v-flex xs12 sm6 md3>
-                <v-text-field label="Solo" placeholder="Товар" solo v-model.trim="item"></v-text-field>
-            </v-flex>
+        <v-dialog v-model="dialog.visible" persistent max-width="290">
+            <v-card>
+                <v-card-title class="headline">Внимание</v-card-title>
+                <v-card-text>{{ dialog.text }}</v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="green darken-1" flat @click.native="dialog.visible = false">Закрыть</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
 
-            <v-btn outline color="indigo" type="submit" :disabled="!item.length">Добавить</v-btn>
+        <v-form @submit.prevent="add()">
+
+            <v-container grid-list-md text-xs-center>
+                <v-layout row wrap>
+                    <v-flex xs9>
+                        <v-text-field v-model.trim="item" label="Товар" outline :counter="100"></v-text-field>
+                    </v-flex>
+                    <v-flex xs3>
+                        <v-btn outline color="indigo" :large="true" type="submit" :disabled="!item.length">Добавить</v-btn>
+                    </v-flex>
+                </v-layout>
+            </v-container>
 
             <v-list two-line subheader v-if="form.list.length">
-                <v-subheader inset>Товары</v-subheader>
+                <v-subheader inset>Товары в корзине</v-subheader>
 
                 <v-list-tile
-                        v-for="item in form.list"
-                        :key="item"
+                        v-for="(item, index) in form.list"
+                        :key="index"
                         avatar
-                        @click="remove(item)"
+                        @click=""
                 >
                     <v-list-tile-avatar>
-                        <v-icon class="grey lighten-1 white--text">folder</v-icon>
+                        <v-icon class="grey lighten-1 white--text">shopping_cart</v-icon>
                     </v-list-tile-avatar>
 
                     <v-list-tile-content>
@@ -63,9 +73,12 @@
                     </v-list-tile-content>
 
                     <v-list-tile-action>
-                        <v-btn icon ripple>
-                            <v-icon color="grey lighten-1">info</v-icon>
-                        </v-btn>
+                        <v-tooltip bottom>
+                            <v-btn flat icon color="red" @click="remove(item)" slot="activator">
+                                <v-icon>delete</v-icon>
+                            </v-btn>
+                            <span>удалить</span>
+                        </v-tooltip>
                     </v-list-tile-action>
                 </v-list-tile>
 
@@ -79,149 +92,82 @@
                 <v-layout row wrap>
 
                     <v-flex xs12 sm6>
-                        <v-text-field v-model="form.phone" label="Номер телефона" outline></v-text-field>
+                        <v-text-field v-model="form.first_name" label="Имя" outline></v-text-field>
                     </v-flex>
 
                     <v-flex xs12 sm6>
-                        <v-text-field v-model="form.delivery_address" label="Адрес доставки" outline></v-text-field>
+                        <v-text-field v-model="form.phone" mask="phone" label="Номер телефона" outline></v-text-field>
+                    </v-flex>
+
+                    <v-flex xs12>
+                        <v-autocomplete
+                                outline
+                                v-model="form.delivery_address"
+                                :items="items"
+                                :loading="isLoading"
+                                :search-input.sync="search"
+                                hide-no-data
+                                hide-selected
+                                label="Адрес доставки"
+                                placeholder="Начните ввод для поиска"
+                                prepend-icon="mdi-database-search"
+                                return-object
+                                :clearable="true"
+                        ></v-autocomplete>
+                    </v-flex>
+
+                    <v-flex xs12>
+                        <v-textarea
+                                v-model="form.comment"
+                                outline
+                                label="Примечание"
+                        ></v-textarea>
                     </v-flex>
 
                 </v-layout>
             </v-container>
-        </v-form>
-
-        <template>
-            <div class="text-xs-center">
-                <v-btn
-                        :disabled="dialog"
-                        :loading="dialog"
-                        outline
-                        color="indigo"
-                        @click="confirm()"
-                        :disabled="!isFormValid()"
-                >
-                    Подтвердить заказ
-                </v-btn>
-
-                <v-dialog
-                        v-model="dialog"
-                        hide-overlay
-                        persistent
-                        width="300"
-                >
-                    <v-card
-                            color="primary"
-                            dark
+            <template>
+                <div class="text-xs-center">
+                    <v-btn
+                            :disabled="loader || !isFormValid()"
+                            :loading="loader"
+                            outline
+                            color="indigo"
+                            @click="confirm()"
                     >
-                        <v-card-text>
-                            Please stand by
-                            <v-progress-linear
-                                    indeterminate
-                                    color="white"
-                                    class="mb-0"
-                            ></v-progress-linear>
-                        </v-card-text>
-                    </v-card>
-                </v-dialog>
-            </div>
-        </template>
+                        Подтвердить заказ
+                    </v-btn>
+
+                    <v-dialog
+                            v-model="loader"
+                            hide-overlay
+                            persistent
+                            width="300"
+                    >
+                        <v-card color="primary" dark>
+                            <v-card-text>
+                                Оформления заказа...
+                                <v-progress-linear
+                                        indeterminate
+                                        color="white"
+                                        class="mb-0"
+                                ></v-progress-linear>
+                            </v-card-text>
+                        </v-card>
+                    </v-dialog>
+                </div>
+            </template>
+        </v-form>
 
     </div>
 </template>
 
 <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
-<script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
 
-<script>
-
-    var App = Vue.component('app', {
-        template: '#template_app',
-        data: function () {
-            return {}
-        }
-    });
-
-    Vue.component('order-form', {
-        template: '#template_order-form',
-        data: function () {
-            return {
-                item: '',
-                form: {
-                    list: [],
-                    phone: '',
-                    delivery_address: '',
-                },
-                dialog: false,
-            }
-        },
-        created() {
-            this.sync();
-        },
-        methods: {
-            add() {
-                this.form.list.push(this.item);
-                this.item = '';
-            },
-            remove(item) {
-                var index = this.form.list.indexOf(item);
-                this.form.list.splice(index, 1);
-            },
-            confirm() {
-                this.dialog = true;
-                this.$http.post('/order', this.form).then(function (res) {
-
-                }).catch(function (err) {
-                    console.log(err.body);
-                }).finally(function () {
-                    this.dialog = false;
-                })
-            },
-            sync() {
-
-                var cached = {};
-
-                try {
-                    cached = JSON.parse(window.localStorage.getItem('form'))
-                } catch (e) {
-                }
-
-                for (var key in cached) {
-                    if (this.form.hasOwnProperty(key)) {
-                        this.form[key] = cached[key];
-                    }
-                }
-            },
-            isFormValid() {
-                return this.form.list.length && this.form.phone && this.form.delivery_address;
-            }
-        },
-        watch: {
-            form: {
-                handler: function () {
-                    window.localStorage.setItem('form', JSON.stringify(this.form));
-                },
-                deep: true
-            },
-            watch: {
-                dialog(val) {
-                    if (!val) return;
-                    setTimeout(() => (this.dialog = false), 4000)
-                }
-            },
-        }
-    });
-
-    new Vue({
-        el: '#app',
-        render: function (createElement) {
-            return createElement(App)
-        }
-    })
-</script>
+<script src="/public/js/app.js"></script>
 
 </body>
 </html>

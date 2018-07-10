@@ -36,21 +36,6 @@ func createResponse(req *http.Request, fn func(http.ResponseWriter, *http.Reques
 	return responseRecorder
 }
 
-func TestHomePageOpened(t *testing.T) {
-	req, _ := http.NewRequest("GET", "/", nil)
-	res := createResponse(req, http_handlers.HomePageHandler)
-
-	if status := res.Code; status != http.StatusOK {
-		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
-	}
-
-	expected := `<div id="app"></div>`
-
-	if content := res.Body.String(); !strings.Contains(content, expected) {
-		t.Errorf("handler returned unexpected body: got %v want %v", res.Body.String(), expected)
-	}
-}
-
 func TestGetBalance(t *testing.T) {
 
 	req, _ := http.NewRequest("GET", "/balance", strings.NewReader(`{"user": 10}`))

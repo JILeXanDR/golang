@@ -3,7 +3,6 @@ package db
 import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	"log"
 	"os"
 	"fmt"
 )
@@ -18,18 +17,6 @@ func GetUserBalance(userId int) (res float64, err error) {
 	}
 
 	return user.Balance, nil
-}
-
-func sender(channel chan string) {
-	channel <- "ping"
-	channel <- "ping"
-	channel <- "ping"
-}
-
-func receiver(channel chan string) {
-	for {
-		log.Println(<-channel)
-	}
 }
 
 func Connect() (err error) {
@@ -49,15 +36,6 @@ func Connect() (err error) {
 	}
 
 	Connection = db
-
-	var channel = make(chan string)
-
-	log.Println("before")
-
-	go sender(channel)
-	go receiver(channel)
-
-	log.Println("after")
 
 	if os.Getenv("DB_LOG_MODE_ENABLED") == "true" {
 		Connection.LogMode(true)

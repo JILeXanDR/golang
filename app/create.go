@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"github.com/JILeXanDR/golang/db"
 	"github.com/JILeXanDR/golang/http_handlers"
+	"os"
 )
 
 var loaded = false
@@ -24,20 +25,28 @@ func Create(env string) {
 		panic(err)
 	}
 
+	// TODO FIX
 	//defer db.Connection.Close()
 
 	r := mux.NewRouter()
 
 	r.Use(loggingMiddleware)
 
-	r.HandleFunc("/", http_handlers.HomePageHandler).Methods("GET")
+	rootDir := os.Getenv("ROOT_DIR")
+
+	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, rootDir+"/public/index.html")
+	})
+
 	r.HandleFunc("/balance", http_handlers.GetBalanceHandler).Methods("POST")
 	r.HandleFunc("/deposit", http_handlers.DepositMoneyHandler).Methods("POST")
 	r.HandleFunc("/withdraw", http_handlers.WithdrawMoneyHandler).Methods("POST")
 	r.HandleFunc("/transfer", http_handlers.TransferMoneyHandler).Methods("POST")
 	r.HandleFunc("/order", http_handlers.OrderHandler).Methods("POST")
 	r.HandleFunc("/orders", http_handlers.GetOrdersHandler).Methods("GET")
+	r.HandleFunc("/find-address", http_handlers.FindAddressHandler).Methods("GET")
 
+	http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir(rootDir+"/public"))))
 	http.Handle("/", r)
 }
 
