@@ -6,12 +6,20 @@ import (
 	"encoding/json"
 	"github.com/JILeXanDR/golang/db"
 	"github.com/jinzhu/gorm/dialects/postgres"
+	"log"
 )
 
+type deliveryAddress struct {
+	Value string `json:"value"`
+	Name  string `json:"name"`
+}
+
 type requestOrder struct {
-	List            []string `json:"list"`
-	Phone           string   `json:"phone"`
-	DeliveryAddress string   `json:"delivery_address"`
+	List            []string        `json:"list"`
+	Phone           string          `json:"phone"`
+	DeliveryAddress deliveryAddress `json:"delivery_address"`
+	Name            string          `json:"name"`
+	Comment         string          `json:"comment"`
 }
 
 func parseBody(r *http.Request) (requestOrder) {
@@ -29,12 +37,18 @@ func OrderHandler(w http.ResponseWriter, r *http.Request) {
 
 	var body = parseBody(r)
 
+	log.Println(body.DeliveryAddress.Name)
+
 	metadata, err := json.Marshal(body.List)
 
 	var order = &db.Order{
-		List:            postgres.Jsonb{metadata},
-		DeliveryAddress: body.DeliveryAddress,
-		Phone:           body.Phone,
+		List:              postgres.Jsonb{metadata},
+		DeliveryAddressId: body.DeliveryAddress.Value,
+		DeliveryAddress:   body.DeliveryAddress.Name,
+		Phone:             body.Phone,
+		Name:              body.Name,
+		Comment:           body.Comment,
+		Status:            db.STATUS_CREATED,
 	}
 	err = db.Connection.Create(order).Error
 	if err != nil {
@@ -42,5 +56,5 @@ func OrderHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	common.JsonResponse(w, body, 200)
+	common.JsonResponse(w, order, 200)
 }

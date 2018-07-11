@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet">
@@ -11,8 +11,48 @@
 
 <div id="app"></div>
 
+<template id="tpl_footer">
+    <v-footer dark height="auto" :app="false">
+        <v-card flat tile class="indigo lighten-1 white--text text-xs-center">
+            <v-card-text>
+                <v-btn v-for="icon, index in icons" :key="index" class="mx-3 white--text" icon>
+                    <v-icon size="24px">{{ icon }}</v-icon>
+                </v-btn>
+            </v-card-text>
+
+            <v-card-text class="white--text pt-0">
+                Phasellus feugiat arcu sapien, et iaculis ipsum elementum sit amet. Mauris cursus commodo interdum.
+                Praesent ut risus eget metus luctus accumsan id ultrices nunc. Sed at orci sed massa consectetur
+                dignissim a sit amet dui. Duis commodo vitae velit et faucibus. Morbi vehicula lacinia malesuada. Nulla
+                placerat augue vel ipsum ultrices, cursus iaculis dui sollicitudin. Vestibulum eu ipsum vel diam
+                elementum tempor vel ut orci. Orci varius natoque penatibus et magnis dis parturient montes, nascetur
+                ridiculus mus.
+            </v-card-text>
+
+            <v-divider></v-divider>
+
+            <v-card-text class="white--text">
+                &copy;{{ year }} — <strong>{{ siteName }}</strong>
+            </v-card-text>
+        </v-card>
+    </v-footer>
+</template>
+
+<template id="tpl_header">
+    <v-jumbotron :gradient="gradient" dark src="https://cdn.vuetifyjs.com/images/parallax/material2.jpg" height="150px">
+        <v-container fill-height>
+            <v-layout align-center>
+                <v-flex text-xs-center>
+                    <h4 class="display-3">Сервис на стадии тестирования</h4>
+                </v-flex>
+            </v-layout>
+        </v-container>
+    </v-jumbotron>
+</template>
+
 <template id="template_app">
     <v-app>
+        <my-header></my-header>
         <v-container grid-list-md text-xs-center>
             <v-layout row wrap>
                 <v-flex xs12>
@@ -20,17 +60,12 @@
                 </v-flex>
             </v-layout>
         </v-container>
-        <v-footer height="auto" color="primary lighten-1">
-            <v-layout justify-center row wrap>
-                <div>&copy; {{ new Date().getFullYear() }}</div>
-            </v-layout>
-        </v-footer>
+        <my-footer></my-footer>
     </v-app>
 </template>
 
 <template id="template_order-form">
     <div>
-
         <v-dialog v-model="dialog.visible" persistent max-width="290">
             <v-card>
                 <v-card-title class="headline">Внимание</v-card-title>
@@ -50,67 +85,69 @@
                         <v-text-field v-model.trim="item" label="Товар" outline :counter="100"></v-text-field>
                     </v-flex>
                     <v-flex xs3>
-                        <v-btn outline color="indigo" :large="true" type="submit" :disabled="!item.length">Добавить</v-btn>
+                        <v-btn outline color="indigo" :large="true" type="submit" :disabled="!item.length">Добавить
+                        </v-btn>
                     </v-flex>
                 </v-layout>
             </v-container>
 
-            <v-list two-line subheader v-if="form.list.length">
-                <v-subheader inset>Товары в корзине</v-subheader>
+            <v-card>
+                <v-toolbar card color="indigo" dark dense>
+                    <v-toolbar-title class="body-2">Товары в корзине</v-toolbar-title>
+                </v-toolbar>
 
-                <v-list-tile
-                        v-for="(item, index) in form.list"
-                        :key="index"
-                        avatar
-                        @click=""
-                >
-                    <v-list-tile-avatar>
-                        <v-icon class="grey lighten-1 white--text">shopping_cart</v-icon>
-                    </v-list-tile-avatar>
+                <v-list two-line subheader v-if="form.list.length">
+                    <v-list-tile v-for="(item, index) in form.list" :key="index" avatar @click="">
+                        <v-list-tile-avatar>
+                            <v-icon class="grey lighten-1 white--text">shopping_cart</v-icon>
+                        </v-list-tile-avatar>
 
-                    <v-list-tile-content>
-                        <v-list-tile-title>{{ item }}</v-list-tile-title>
-                    </v-list-tile-content>
+                        <v-list-tile-content>
+                            <v-list-tile-title>{{ item }}</v-list-tile-title>
+                        </v-list-tile-content>
 
-                    <v-list-tile-action>
-                        <v-tooltip bottom>
-                            <v-btn flat icon color="red" @click="remove(item)" slot="activator">
-                                <v-icon>delete</v-icon>
-                            </v-btn>
-                            <span>удалить</span>
-                        </v-tooltip>
-                    </v-list-tile-action>
-                </v-list-tile>
+                        <v-list-tile-action>
+                            <v-tooltip bottom>
+                                <v-btn flat icon color="red" @click="remove(item)" slot="activator">
+                                    <v-icon>delete</v-icon>
+                                </v-btn>
+                                <span>удалить</span>
+                            </v-tooltip>
+                        </v-list-tile-action>
+                    </v-list-tile>
+                </v-list>
 
-            </v-list>
+                <v-card-text v-else>
+                    <h4>Вы пока что ничего не добавили</h4>
+                </v-card-text>
+            </v-card>
 
-            <h4 v-else>В списке заказов пусто</h4>
         </v-form>
 
         <v-form v-if="form.list.length">
             <v-container>
                 <v-layout row wrap>
 
-                    <v-flex xs12 sm6>
-                        <v-text-field v-model="form.first_name" label="Имя" outline></v-text-field>
+                    <v-flex xs12 sm3>
+                        <v-text-field v-model="form.name" label="Имя" outline></v-text-field>
                     </v-flex>
 
-                    <v-flex xs12 sm6>
+                    <v-flex xs12 sm4>
                         <v-text-field v-model="form.phone" mask="phone" label="Номер телефона" outline></v-text-field>
                     </v-flex>
 
-                    <v-flex xs12>
+                    <v-flex xs12 sm5>
                         <v-autocomplete
                                 outline
                                 v-model="form.delivery_address"
                                 :items="items"
                                 :loading="isLoading"
                                 :search-input.sync="search"
-                                hide-selected
                                 label="Адрес доставки"
                                 placeholder="Начните ввод для поиска"
-                                prepend-icon="mdi-database-search"
                                 return-object
+                                item-text="name"
+                                item-value="value"
                                 :clearable="true"
                         ></v-autocomplete>
                     </v-flex>
@@ -157,7 +194,6 @@
                 </div>
             </template>
         </v-form>
-
     </div>
 </template>
 
@@ -166,7 +202,12 @@
 <script src="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
 
+<script src="/public/js/utils.js"></script>
+<script src="/public/js/my-header.js"></script>
+<script src="/public/js/my-footer.js"></script>
+<script src="/public/js/order-form.js"></script>
 <script src="/public/js/app.js"></script>
+<script src="/public/js/main.js"></script>
 
 </body>
 </html>

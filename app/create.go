@@ -32,12 +32,7 @@ func Create(env string) {
 
 	r.Use(loggingMiddleware)
 
-	rootDir := os.Getenv("ROOT_DIR")
-
-	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, rootDir+"/public/index.html")
-	})
-
+	r.HandleFunc("/", http_handlers.IndexPageHandler)
 	r.HandleFunc("/balance", http_handlers.GetBalanceHandler).Methods("POST")
 	r.HandleFunc("/deposit", http_handlers.DepositMoneyHandler).Methods("POST")
 	r.HandleFunc("/withdraw", http_handlers.WithdrawMoneyHandler).Methods("POST")
@@ -46,7 +41,7 @@ func Create(env string) {
 	r.HandleFunc("/orders", http_handlers.GetOrdersHandler).Methods("GET")
 	r.HandleFunc("/find-address", http_handlers.FindAddressHandler).Methods("GET")
 
-	http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir(rootDir+"/public"))))
+	http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir(os.Getenv("ROOT_DIR")+"/public"))))
 	http.Handle("/", r)
 }
 

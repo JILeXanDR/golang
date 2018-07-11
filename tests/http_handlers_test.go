@@ -10,9 +10,9 @@ import (
 	"encoding/json"
 )
 
-func assertEqual(t *testing.T, got interface{}, expected interface{}) {
+func assertEqual(t *testing.T, got interface{}, expected interface{}, message string) {
 	if got != expected {
-		t.Fatalf("got %v != expected %v", got, expected)
+		t.Fatalf("%v => got %v, but expected %v", message, got, expected)
 	}
 }
 
@@ -48,5 +48,5 @@ func TestGetBalance(t *testing.T) {
 		panic(err)
 	}
 
-	assertEqual(t, int(data.Balance), 1000)
+	assertEqual(t, int(data.Balance), 1000, "Bad balance")
 }

@@ -43,15 +43,30 @@ func migrations() {
 		panic(err)
 	}
 
-	// test orders
-	Connection.Create(&Order{
-		Phone:           "0939411685",
-		DeliveryAddress: "Добровольського 6",
-		Comment:         "4 подъезд квартира 117",
-		Name:            "Саша",
-		Status:          STATUS_CREATED,
-		List:            postgres.Jsonb{metadata},
-	})
+	var orders = []Order{
+		Order{
+			Phone:             "0939411685",
+			DeliveryAddressId: "EnHQstGD0LvQuNGG0Y8g0JTQvtCx0YDQvtCy0L7Qu9GM0YHRjNC60L7Qs9C",
+			DeliveryAddress:   "вулиця Добровольського, 6, Черкаси, Черкаська область, Україна",
+			Comment:           "4 подъезд квартира 117",
+			Name:              "Саша",
+			Status:            STATUS_CREATED,
+			List:              postgres.Jsonb{metadata},
+		},
+		Order{
+			Phone:             "0939411685",
+			DeliveryAddressId: "EnTQstGD0LvQuNGG0Y8g0J7RgdGC0LDRhNGW0Y8g0JTQsNGI0LrQvtCy0LjRh9CwLCAzLCDQp9C10YDQutCw0YHQuCwg0KfQtdGA0LrQsNGB0YzQutCwINC",
+			DeliveryAddress:   "вулиця Остафія Дашковича, 3, Черкаси, Черкаська область, Україна",
+			Comment:           "",
+			Name:              "Саша",
+			Status:            STATUS_CREATED,
+			List:              postgres.Jsonb{metadata},
+		},
+	}
+
+	for _, order := range orders {
+		Connection.Create(&order)
+	}
 }
 
 func Connect() (err error) {
