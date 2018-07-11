@@ -5,11 +5,9 @@ Vue.component('my-footer', {
             year: (new Date()).getFullYear(),
             siteName: 'SimpleShopping',
             icons: [
-                'delete',
-                'delete',
-                'delete',
-                'delete',
-                'delete',
+                'fab fa-instagram',
+                'fab fa-facebook-square',
+                'fab fa-vk',
             ],
         }
     }

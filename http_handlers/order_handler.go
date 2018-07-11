@@ -6,7 +6,8 @@ import (
 	"encoding/json"
 	"github.com/JILeXanDR/golang/db"
 	"github.com/jinzhu/gorm/dialects/postgres"
-	"log"
+	"github.com/JILeXanDR/golang/common/sms"
+	"fmt"
 )
 
 type deliveryAddress struct {
@@ -37,8 +38,6 @@ func OrderHandler(w http.ResponseWriter, r *http.Request) {
 
 	var body = parseBody(r)
 
-	log.Println(body.DeliveryAddress.Name)
-
 	metadata, err := json.Marshal(body.List)
 
 	var order = &db.Order{
@@ -55,6 +54,13 @@ func OrderHandler(w http.ResponseWriter, r *http.Request) {
 		common.InternalServerError(w)
 		return
 	}
+
+	var text = fmt.Sprintf("Вы успешно создали заказ под номером %v. Ожидайте СМС по дальнейшей обработке заказа.", order.ID)
+
+	sms.SendSms(
+		"380939411685",
+		text,
+	)
 
 	common.JsonResponse(w, order, 200)
 }

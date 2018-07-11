@@ -2,7 +2,8 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet">
+    <link href='https://fonts1.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
     <link href="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.min.css" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
     <title>SimpleShopping</title>
@@ -21,12 +22,7 @@
             </v-card-text>
 
             <v-card-text class="white--text pt-0">
-                Phasellus feugiat arcu sapien, et iaculis ipsum elementum sit amet. Mauris cursus commodo interdum.
-                Praesent ut risus eget metus luctus accumsan id ultrices nunc. Sed at orci sed massa consectetur
-                dignissim a sit amet dui. Duis commodo vitae velit et faucibus. Morbi vehicula lacinia malesuada. Nulla
-                placerat augue vel ipsum ultrices, cursus iaculis dui sollicitudin. Vestibulum eu ipsum vel diam
-                elementum tempor vel ut orci. Orci varius natoque penatibus et magnis dis parturient montes, nascetur
-                ridiculus mus.
+                Самые большие удобства иногда работают. Школа траур слой может представлять опасения, что баскетбол в настоящее время. Однако, клинические и массы на главной футбольной моркови стоит. DUIs Commodo жизни, готов и шеи. Lacinia футбол транспортных средств. Там нет пропаганды или инвестировать в баскетбол, беге целенаправленной помощи DUI. Производство электроэнергии или времени элемент в диаметре или так клинический. Различные клинические горы Penatibus Супер Боул мгновенно.
             </v-card-text>
 
             <v-divider></v-divider>
@@ -43,7 +39,7 @@
         <v-container fill-height>
             <v-layout align-center>
                 <v-flex text-xs-center>
-                    <h4 class="display-3">Сервис на стадии тестирования</h4>
+                    <img src="/public/img/980981796_ec0c4791-aabf-4851-a1b6-91c74a5a1ef0.png" alt="logo">
                 </v-flex>
             </v-layout>
         </v-container>
@@ -66,6 +62,7 @@
 
 <template id="template_order-form">
     <div>
+
         <v-dialog v-model="dialog.visible" persistent max-width="290">
             <v-card>
                 <v-card-title class="headline">Внимание</v-card-title>
@@ -82,7 +79,7 @@
             <v-container grid-list-md text-xs-center>
                 <v-layout row wrap>
                     <v-flex xs9>
-                        <v-text-field v-model.trim="item" label="Товар" outline :counter="100"></v-text-field>
+                        <v-text-field v-model.trim="item" label='Краткое описание одной единицы товара, например "Большое мак-меню с Макдональдза"' outline :counter="100"></v-text-field>
                     </v-flex>
                     <v-flex xs3>
                         <v-btn outline color="indigo" :large="true" type="submit" :disabled="!item.length">Добавить
@@ -93,7 +90,7 @@
 
             <v-card>
                 <v-toolbar card color="indigo" dark dense>
-                    <v-toolbar-title class="body-2">Товары в корзине</v-toolbar-title>
+                    <v-toolbar-title class="body-2">Список покупок</v-toolbar-title>
                 </v-toolbar>
 
                 <v-list two-line subheader v-if="form.list.length">
@@ -124,7 +121,7 @@
 
         </v-form>
 
-        <v-form v-if="form.list.length">
+        <v-form>
             <v-container>
                 <v-layout row wrap>
 
@@ -162,38 +159,23 @@
 
                 </v-layout>
             </v-container>
-            <template>
-                <div class="text-xs-center">
-                    <v-btn
-                            :disabled="loader || !isFormValid()"
-                            :loading="loader"
-                            outline
-                            color="indigo"
-                            @click="confirm()"
-                    >
-                        Подтвердить заказ
-                    </v-btn>
-
-                    <v-dialog
-                            v-model="loader"
-                            hide-overlay
-                            persistent
-                            width="300"
-                    >
-                        <v-card color="primary" dark>
-                            <v-card-text>
-                                Оформления заказа...
-                                <v-progress-linear
-                                        indeterminate
-                                        color="white"
-                                        class="mb-0"
-                                ></v-progress-linear>
-                            </v-card-text>
-                        </v-card>
-                    </v-dialog>
-                </div>
-            </template>
         </v-form>
+        <template>
+            <div class="text-xs-center">
+                <v-btn :disabled="loader || !isFormValid()" :loading="loader" outline color="indigo" @click="confirm()">
+                    Подтвердить заказ
+                </v-btn>
+
+                <v-dialog v-model="loader" hide-overlay persistent width="300">
+                    <v-card color="primary" dark>
+                        <v-card-text>
+                            Оформления заказа...
+                            <v-progress-linear indeterminate color="white" class="mb-0"></v-progress-linear>
+                        </v-card-text>
+                    </v-card>
+                </v-dialog>
+            </div>
+        </template>
     </div>
 </template>
 
