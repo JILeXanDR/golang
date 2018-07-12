@@ -37,6 +37,8 @@ Vue.component('order-form', {
         },
         confirm() {
 
+            var self = this;
+
             var showDialog = function (text) {
                 this.loader = false;
                 this.dialog.text = text;
@@ -50,6 +52,14 @@ Vue.component('order-form', {
             this.$http.post('/api/orders', this.form).then(function (res) {
                 waiter(function () {
                     showDialog('Заказ оформлен. Ожидайте СМС с подтверждением заказа');
+                    var unwatch = self.$watch('dialog.visible', function (newValue, oldValue) {
+                        // dialog was closed
+                        if (!newValue) {
+                            unwatch();
+                            self.form.list = []; // TODO не работает
+                            self.$router.push({name: 'orders'})
+                        }
+                    });
                 });
             }).catch(function (err) {
                 waiter(function () {

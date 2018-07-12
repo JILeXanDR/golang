@@ -2,10 +2,10 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <link href='https://fonts1.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
     <link href="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.min.css" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+    <link rel="icon" type="image/png" href="/public/favicon.ico"/>
     <title>SimpleShopping</title>
 </head>
 <body>
@@ -42,6 +42,11 @@
                     <img src="/public/img/980981796_ec0c4791-aabf-4851-a1b6-91c74a5a1ef0.png" alt="logo">
                 </v-flex>
             </v-layout>
+            <v-layout justify-center row wrap>
+                <v-btn :to="{ name: 'home' }" color="white" flat round>Сделать заказ</v-btn>
+                <v-btn :to="{ name: 'orders' }" color="white" flat round>Мои заказы</v-btn>
+                <v-btn :to="{ name: 'about_us' }" color="white" flat round>О нас</v-btn>
+            </v-layout>
         </v-container>
     </v-jumbotron>
 </template>
@@ -52,7 +57,7 @@
         <v-container grid-list-md text-xs-center>
             <v-layout row wrap>
                 <v-flex xs12>
-                    <order-form></order-form>
+                    <router-view></router-view>
                 </v-flex>
             </v-layout>
         </v-container>
@@ -169,15 +174,52 @@
     </div>
 </template>
 
+<template id="tpl_orders">
+    <div>
+        <v-data-table
+                :headers="headers"
+                :items="orders"
+                hide-actions
+                item-key="name"
+        >
+            <template slot="items" slot-scope="props">
+                <tr>
+                    <td>{{ props.item.ID }}</td>
+                    <td class="text-xs-left">
+                        <div v-for="item in props.item.list">{{ item }}</div>
+                    </td>
+                    <td class="text-xs-left">{{ props.item.status }}</td>
+                    <td class="text-xs-left">{{ props.item.phone }}</td>
+                    <td class="text-xs-left">{{ props.item.delivery_address }}</td>
+                    <td class="text-xs-left">{{ props.item.comment }}</td>
+                    <td class="text-xs-left">{{ props.item.CreatedAt | date }}</td>
+                </tr>
+            </template>
+            <template slot="expand" slot-scope="props">
+                <v-card flat>
+                    <v-card-text>Peek-a-boo!</v-card-text>
+                </v-card>
+            </template>
+        </v-data-table>
+    </div>
+</template>
+
+<template id="tpl_about-us">
+    <h1>О нас</h1>
+</template>
+
 <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
+<script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
 
 <script src="/public/js/utils.js"></script>
 <script src="/public/js/my-header.js"></script>
 <script src="/public/js/my-footer.js"></script>
 <script src="/public/js/order-form.js"></script>
+<script src="/public/js/orders.js"></script>
+<script src="/public/js/about-us.js"></script>
 <script src="/public/js/app.js"></script>
 <script src="/public/js/main.js"></script>
 
