@@ -8,10 +8,11 @@ import (
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/JILeXanDR/golang/common/sms"
 	"fmt"
-	"github.com/jinzhu/gorm"
 	"time"
 	"github.com/gorilla/mux"
 	"strconv"
+	"strings"
+	"github.com/jinzhu/gorm"
 )
 
 type deliveryAddress struct {
@@ -60,10 +61,27 @@ func getOrder(r *http.Request) (*db.Order, error) {
 	return order, nil
 }
 
+func handleError(w http.ResponseWriter, err error) {
+	if err == gorm.ErrRecordNotFound {
+		common.JsonMessageResponse(w, "Заказ не найден", http.StatusNotFound)
+	} else if err != nil {
+		common.InternalServerError(w, err)
+	}
+}
+
 // создание нового заказа клиентом
 func CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
 
 	var body = parseBody(r)
+	var phoneExample = "0939411685"
+
+	// TODO do it better
+	if len(body.Phone) != len(phoneExample) || !strings.HasPrefix(body.Phone, "0") {
+		common.JsonMessageResponse(w, "Номер телефона введен неверно", http.StatusUnprocessableEntity)
+		return
+	}
+
+	var phone = "38" + body.Phone
 
 	metadata, err := json.Marshal(body.List)
 
@@ -71,7 +89,7 @@ func CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
 		List:              postgres.Jsonb{metadata},
 		DeliveryAddressId: body.DeliveryAddress.Value,
 		DeliveryAddress:   body.DeliveryAddress.Name,
-		Phone:             body.Phone,
+		Phone:             phone,
 		Name:              body.Name,
 		Comment:           body.Comment,
 		Status:            db.STATUS_CREATED,
@@ -84,9 +102,9 @@ func CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
 
 	var text = fmt.Sprintf("Вы успешно создали заказ под номером %v. Ожидайте СМС по дальнейшей обработке заказа.", order.ID)
 
-	go sms.SendSms("380939411685", text)
+	go sms.SendSms(order.Phone, text)
 
-	common.JsonResponse(w, order, 200)
+	common.JsonResponse(w, order, http.StatusCreated)
 }
 
 // получение списка всех заказов (менеджером по заказам)
@@ -98,15 +116,18 @@ func GetOrdersHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	common.JsonResponse(w, orders, 200)
+	common.JsonResponse(w, orders, http.StatusOK)
 }
 
-func handleError(w http.ResponseWriter, err error) {
-	if err == gorm.ErrRecordNotFound {
-		common.JsonMessageResponse(w, "Заказ не найден", 404)
-	} else if err != nil {
-		common.InternalServerError(w, err)
+// получение информации о зазазе (для медежера по заказам)
+func GetOrderHandler(w http.ResponseWriter, r *http.Request) {
+	order, err := getOrder(r)
+	if err != nil {
+		handleError(w, err)
+		return
 	}
+
+	common.JsonResponse(w, order, http.StatusOK)
 }
 
 // отменить заказ (для медежера по заказам)
@@ -134,7 +155,7 @@ func CancelOrderHandler(w http.ResponseWriter, r *http.Request) {
 
 	go sms.SendSms(order.Phone, fmt.Sprintf("Ваш заказ был отменен. Причина: %v", order.CancelReason))
 
-	common.JsonResponse(w, order, 200)
+	common.JsonResponse(w, order, http.StatusOK)
 }
 
 // подтвердить заказ (для медежера по заказам)
@@ -148,7 +169,7 @@ func ConfirmOrderHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if order.Status != db.STATUS_CREATED {
-		common.JsonMessageResponse(w, "Нельзя изменить статус заказа", 400)
+		common.JsonMessageResponse(w, "Нельзя изменить статус заказа", http.StatusBadRequest)
 		return
 	}
 
@@ -161,7 +182,7 @@ func ConfirmOrderHandler(w http.ResponseWriter, r *http.Request) {
 
 	go sms.SendSms(order.Phone, "Ваш заказ был подтверждён")
 
-	common.JsonResponse(w, order, 200)
+	common.JsonResponse(w, order, http.StatusOK)
 }
 
 // отметить заказ доставленым
@@ -189,7 +210,7 @@ func DeliverOrderHandler(w http.ResponseWriter, r *http.Request) {
 
 	go sms.SendSms(order.Phone, "Ваш заказ был доставлен")
 
-	common.JsonResponse(w, order, 200)
+	common.JsonResponse(w, order, http.StatusOK)
 }
 
 // начать обработку заказа
@@ -216,5 +237,5 @@ func ProcessOrderHandler(w http.ResponseWriter, r *http.Request) {
 
 	go sms.SendSms(order.Phone, "Ваш заказ был взят в обработку")
 
-	common.JsonResponse(w, order, 200)
+	common.JsonResponse(w, order, http.StatusOK)
 }

@@ -13,6 +13,8 @@ func main() {
 
 	port := ":" + os.Getenv("PORT")
 
+	http.Handle("/", app.GetRouter())
+
 	log.Println("Start server at http://localhost" + port)
 	log.Fatal(http.ListenAndServe(port, nil))
 }

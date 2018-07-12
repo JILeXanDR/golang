@@ -47,13 +47,13 @@ Vue.component('order-form', {
 
             this.loader = true;
 
-            this.$http.post('/orders', this.form).then(function (res) {
+            this.$http.post('/api/orders', this.form).then(function (res) {
                 waiter(function () {
                     showDialog('Заказ оформлен. Ожидайте СМС с подтверждением заказа');
                 });
             }).catch(function (err) {
                 waiter(function () {
-                    showDialog(err.body);
+                    showDialog(err.body.message);
                 });
             });
         },
