@@ -29,7 +29,7 @@ func TransferMoneyHandler(w http.ResponseWriter, r *http.Request) {
 
 	internalErr, logicErr := common.TransferMoney(int(fromId), int(toId), value)
 	if internalErr != nil {
-		common.InternalServerError(w)
+		common.InternalServerError(w, internalErr)
 		return
 	} else if logicErr != nil {
 		common.HandleError(w, logicErr)

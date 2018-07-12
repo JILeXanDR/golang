@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"net/url"
 	"log"
+	"time"
 )
 
 type apiResponse struct {
@@ -42,6 +43,9 @@ func GetOwnBalance() {
 }
 
 func SendSms(phone string, text string) {
+
+	// эмулируем долгую обработку
+	time.Sleep(3 * time.Second)
 
 	if os.Getenv("FAKE_SMS") == "true" {
 		log.Printf("Fake sms is enabled. Phone=%v, Text=%v", phone, text)

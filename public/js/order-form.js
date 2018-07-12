@@ -39,7 +39,7 @@ Vue.component('order-form', {
 
             var showDialog = function (text) {
                 this.loader = false;
-                this.dialog.text = 'Заказ оформлен. Ожидайте подтверждения и доставку курьером';
+                this.dialog.text = text;
                 this.dialog.visible = true;
             }.bind(this);
 
@@ -47,9 +47,9 @@ Vue.component('order-form', {
 
             this.loader = true;
 
-            this.$http.post('/order', this.form).then(function (res) {
+            this.$http.post('/orders', this.form).then(function (res) {
                 waiter(function () {
-                    showDialog('Заказ оформлен. Ожидайте подтверждения и доставку курьером');
+                    showDialog('Заказ оформлен. Ожидайте СМС с подтверждением заказа');
                 });
             }).catch(function (err) {
                 waiter(function () {

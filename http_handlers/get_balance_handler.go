@@ -35,7 +35,7 @@ func GetBalanceHandler(w http.ResponseWriter, r *http.Request) {
 		common.JsonMessageResponse(w, "User does not exist", 404)
 		return
 	} else if err != nil {
-		common.InternalServerError(w)
+		common.InternalServerError(w, err)
 		return
 	}
 

@@ -20,7 +20,7 @@ func FindAddressHandler(w http.ResponseWriter, r *http.Request) {
 		// брать телефон с кукис
 		err := db.Connection.Find(&lastOrders, &db.Order{Phone: "0939411685"}).Error
 		if err != nil {
-			common.InternalServerError(w)
+			common.InternalServerError(w, err)
 			return
 		}
 		for _, order := range lastOrders {

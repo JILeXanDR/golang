@@ -138,9 +138,8 @@
                                 outline
                                 v-model="form.delivery_address"
                                 :items="items"
-                                :loading="isLoading"
                                 :search-input.sync="search"
-                                label="Адрес доставки"
+                                label="Адресавки"
                                 placeholder="Начните ввод для поиска"
                                 return-object
                                 item-text="name"
@@ -150,32 +149,23 @@
                     </v-flex>
 
                     <v-flex xs12>
-                        <v-textarea
-                                v-model="form.comment"
-                                outline
-                                label="Примечание"
-                        ></v-textarea>
+                        <v-textarea v-model="form.comment" outline label="Примечание к заказу"></v-textarea>
                     </v-flex>
 
                 </v-layout>
             </v-container>
         </v-form>
-        <template>
-            <div class="text-xs-center">
-                <v-btn :disabled="loader || !isFormValid()" :loading="loader" outline color="indigo" @click="confirm()">
-                    Подтвердить заказ
-                </v-btn>
-
-                <v-dialog v-model="loader" hide-overlay persistent width="300">
-                    <v-card color="primary" dark>
-                        <v-card-text>
-                            Оформления заказа...
-                            <v-progress-linear indeterminate color="white" class="mb-0"></v-progress-linear>
-                        </v-card-text>
-                    </v-card>
-                </v-dialog>
-            </div>
-        </template>
+        <div class="text-xs-center">
+            <v-btn :disabled="loader || !isFormValid()" :loading="loader" outline color="indigo" @click="confirm()">Подтвердить заказ</v-btn>
+        </div>
+        <v-dialog v-model="loader" hide-overlay persistent width="300">
+            <v-card color="primary" dark>
+                <v-card-text>
+                    Оформления заказа...
+                    <v-progress-linear indeterminate color="white" class="mb-0"></v-progress-linear>
+                </v-card-text>
+            </v-card>
+        </v-dialog>
     </div>
 </template>
 

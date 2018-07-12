@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"encoding/json"
 	"errors"
+	"os"
 )
 
 func JsonResponse(w http.ResponseWriter, data interface{}, statusCode int) {
@@ -21,8 +22,13 @@ func HandleError(w http.ResponseWriter, err error) {
 	JsonMessageResponse(w, err.Error(), 500)
 }
 
-func InternalServerError(w http.ResponseWriter) {
-	HandleError(w, errors.New("Internal Server Error"))
+func InternalServerError(w http.ResponseWriter, err error) {
+	if os.Getenv("ENV") == "dev" {
+		panic(err)
+		HandleError(w, err)
+	} else {
+		HandleError(w, errors.New("Internal Server Error"))
+	}
 }
 
 func ValidationError(w http.ResponseWriter, message string) {
