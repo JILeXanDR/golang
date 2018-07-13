@@ -2,17 +2,17 @@ package http_handlers
 
 import (
 	"net/http"
-	"github.com/JILeXanDR/golang/common"
 	"encoding/json"
-	"github.com/JILeXanDR/golang/db"
+	"github.com/JILeXanDR/golang/app/db"
 	"github.com/jinzhu/gorm/dialects/postgres"
-	"github.com/JILeXanDR/golang/common/sms"
 	"fmt"
 	"time"
 	"github.com/gorilla/mux"
 	"strconv"
 	"strings"
 	"github.com/jinzhu/gorm"
+	"github.com/JILeXanDR/golang/external_api"
+	"github.com/JILeXanDR/golang/app/response_writer"
 )
 
 type deliveryAddress struct {
@@ -63,9 +63,9 @@ func getOrder(r *http.Request) (*db.Order, error) {
 
 func handleError(w http.ResponseWriter, err error) {
 	if err == gorm.ErrRecordNotFound {
-		common.JsonMessageResponse(w, "Заказ не найден", http.StatusNotFound)
+		response_writer.JsonMessageResponse(w, "Заказ не найден", http.StatusNotFound)
 	} else if err != nil {
-		common.InternalServerError(w, err)
+		response_writer.InternalServerError(w, err)
 	}
 }
 
@@ -77,7 +77,7 @@ func CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
 
 	// TODO do it better
 	if len(body.Phone) != len(phoneExample) || !strings.HasPrefix(body.Phone, "0") {
-		common.JsonMessageResponse(w, "Номер телефона введен неверно", http.StatusUnprocessableEntity)
+		response_writer.JsonMessageResponse(w, "Номер телефона введен неверно", http.StatusUnprocessableEntity)
 		return
 	}
 
@@ -96,15 +96,15 @@ func CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	err = db.Connection.Create(order).Error
 	if err != nil {
-		common.InternalServerError(w, err)
+		response_writer.InternalServerError(w, err)
 		return
 	}
 
 	var text = fmt.Sprintf("Вы успешно создали заказ под номером %v. Ожидайте СМС по дальнейшей обработке заказа.", order.ID)
 
-	go sms.SendSms(order.Phone, text)
+	go external_api.SendSms(order.Phone, text)
 
-	common.JsonResponse(w, order, http.StatusCreated)
+	response_writer.JsonResponse(w, order, http.StatusCreated)
 }
 
 // получение списка всех заказов (менеджером по заказам)
@@ -112,11 +112,11 @@ func GetOrdersHandler(w http.ResponseWriter, r *http.Request) {
 	var orders = &[]db.Order{}
 	err := db.Connection.Find(orders).Error
 	if err != nil {
-		common.InternalServerError(w, err)
+		response_writer.InternalServerError(w, err)
 		return
 	}
 
-	common.JsonResponse(w, orders, http.StatusOK)
+	response_writer.JsonResponse(w, orders, http.StatusOK)
 }
 
 // получение информации о зазазе (для медежера по заказам)
@@ -127,7 +127,7 @@ func GetOrderHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	common.JsonResponse(w, order, http.StatusOK)
+	response_writer.JsonResponse(w, order, http.StatusOK)
 }
 
 // отменить заказ (для медежера по заказам)
@@ -141,7 +141,7 @@ func CancelOrderHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if order.Status != db.STATUS_CREATED {
-		common.JsonMessageResponse(w, "Нельзя изменить статус заказа", 400)
+		response_writer.JsonMessageResponse(w, "Нельзя изменить статус заказа", 400)
 		return
 	}
 
@@ -149,13 +149,13 @@ func CancelOrderHandler(w http.ResponseWriter, r *http.Request) {
 	order.CancelReason = "отменено менеджером без причины"
 	err = db.Connection.Save(order).Error
 	if err != nil {
-		common.InternalServerError(w, err)
+		response_writer.InternalServerError(w, err)
 		return
 	}
 
-	go sms.SendSms(order.Phone, fmt.Sprintf("Ваш заказ был отменен. Причина: %v", order.CancelReason))
+	go external_api.SendSms(order.Phone, fmt.Sprintf("Ваш заказ был отменен. Причина: %v", order.CancelReason))
 
-	common.JsonResponse(w, order, http.StatusOK)
+	response_writer.JsonResponse(w, order, http.StatusOK)
 }
 
 // подтвердить заказ (для медежера по заказам)
@@ -169,20 +169,20 @@ func ConfirmOrderHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if order.Status != db.STATUS_CREATED {
-		common.JsonMessageResponse(w, "Нельзя изменить статус заказа", http.StatusBadRequest)
+		response_writer.JsonMessageResponse(w, "Нельзя изменить статус заказа", http.StatusBadRequest)
 		return
 	}
 
 	order.Status = db.STATUS_CONFIRMED
 	err = db.Connection.Save(order).Error
 	if err != nil {
-		common.InternalServerError(w, err)
+		response_writer.InternalServerError(w, err)
 		return
 	}
 
-	go sms.SendSms(order.Phone, "Ваш заказ был подтверждён")
+	go external_api.SendSms(order.Phone, "Ваш заказ был подтверждён")
 
-	common.JsonResponse(w, order, http.StatusOK)
+	response_writer.JsonResponse(w, order, http.StatusOK)
 }
 
 // отметить заказ доставленым
@@ -196,7 +196,7 @@ func DeliverOrderHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if order.Status != db.STATUS_PROCESSING {
-		common.JsonMessageResponse(w, fmt.Sprintf("Нельзя изменить статус заказа. Заказ должен быть в статусе '%v', текущий статус '%v'", db.STATUS_PROCESSING, order.Status), 400)
+		response_writer.JsonMessageResponse(w, fmt.Sprintf("Нельзя изменить статус заказа. Заказ должен быть в статусе '%v', текущий статус '%v'", db.STATUS_PROCESSING, order.Status), 400)
 		return
 	}
 
@@ -204,13 +204,13 @@ func DeliverOrderHandler(w http.ResponseWriter, r *http.Request) {
 	order.DeliveredAt = time.Now()
 	err = db.Connection.Save(order).Error
 	if err != nil {
-		common.InternalServerError(w, err)
+		response_writer.InternalServerError(w, err)
 		return
 	}
 
-	go sms.SendSms(order.Phone, "Ваш заказ был доставлен")
+	go external_api.SendSms(order.Phone, "Ваш заказ был доставлен")
 
-	common.JsonResponse(w, order, http.StatusOK)
+	response_writer.JsonResponse(w, order, http.StatusOK)
 }
 
 // начать обработку заказа
@@ -224,18 +224,18 @@ func ProcessOrderHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if order.Status != db.STATUS_CONFIRMED {
-		common.JsonMessageResponse(w, fmt.Sprintf("Нельзя взять заказ в обработку. Заказ должен быть в статусе '%v', текущий статус '%v'", db.STATUS_CONFIRMED, order.Status), 400)
+		response_writer.JsonMessageResponse(w, fmt.Sprintf("Нельзя взять заказ в обработку. Заказ должен быть в статусе '%v', текущий статус '%v'", db.STATUS_CONFIRMED, order.Status), 400)
 		return
 	}
 
 	order.Status = db.STATUS_PROCESSING
 	err = db.Connection.Save(order).Error
 	if err != nil {
-		common.InternalServerError(w, err)
+		response_writer.InternalServerError(w, err)
 		return
 	}
 
-	go sms.SendSms(order.Phone, "Ваш заказ был взят в обработку")
+	go external_api.SendSms(order.Phone, "Ваш заказ был взят в обработку")
 
-	common.JsonResponse(w, order, http.StatusOK)
+	response_writer.JsonResponse(w, order, http.StatusOK)
 }

@@ -1,8 +1,10 @@
-hash: c50ba15dde9efd0695b051b7f81d5a16c202be2a21f382e08c046a2b54bf6a79
-updated: 2018-07-13T13:35:43.091656698+03:00
+hash: b001bc1c2eb725cf7792400b5bab3a9aee455d744f50196f0854ee13a122489a
+updated: 2018-07-13T13:58:52.52570515+03:00
 imports:
 - name: github.com/asaskevich/govalidator
   version: ccb8e960c48f04d6935e72476ae4a51028f9e22f
+- name: github.com/gin-gonic/gin
+  version: d459835d2b077e44f7c9b453505ee29881d5d12d
 - name: github.com/google/uuid
   version: dec09d789f3dba190787f8b4454c7d3c936fed9e
 - name: github.com/gorilla/context

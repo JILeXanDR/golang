@@ -1,4 +1,4 @@
-package maps
+package external_api
 
 import (
 	"os"
@@ -12,7 +12,7 @@ type Address struct {
 }
 
 // возвращает список мест по ключевому слову
-func SearchAddress(input string) (addresses []Address, err error) {
+func FindAddresses(input string) (addresses []Address, err error) {
 
 	var client *maps.Client
 	client, err = maps.NewClient(maps.WithAPIKey(os.Getenv("GOOGLE_MAPS_API_KEY")))

@@ -16,6 +16,8 @@ import:
   - context
   - websocket
 - package: googlemaps.github.io/maps
+- package: github.com/gin-gonic/gin
+  version: ^1.2.0
 testImport:
 - package: github.com/stretchr/testify
   version: ^1.2.2

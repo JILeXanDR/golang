@@ -12,16 +12,6 @@ import (
 
 var Connection *gorm.DB
 
-func GetUserBalance(userId int) (res float64, err error) {
-	var user = &User{}
-	err = Connection.Where(&User{Identifier: userId}).First(user).Error
-	if err != nil {
-		return 0, err
-	}
-
-	return user.Balance, nil
-}
-
 func migrations() {
 
 	var models = []interface{}{&User{}, &Order{}}

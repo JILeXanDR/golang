@@ -4,7 +4,7 @@ import (
 	"testing"
 	"net/http"
 	"net/http/httptest"
-	"github.com/JILeXanDR/golang/http_handlers"
+	"github.com/JILeXanDR/golang/app/http_handlers"
 	"strings"
 	"github.com/JILeXanDR/golang/app"
 	"encoding/json"

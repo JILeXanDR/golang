@@ -1,9 +1,10 @@
-package common
+package services
 
 import (
 	"errors"
-	"github.com/JILeXanDR/golang/db"
+	"github.com/JILeXanDR/golang/app/db"
 	"github.com/jinzhu/gorm"
+	errors2 "github.com/JILeXanDR/golang/errors"
 )
 
 // transfer money from one user to another user
@@ -14,7 +15,7 @@ func TransferMoney(fromId int, toId int, amount float64) (internalErr error, myE
 	}
 
 	if fromId == toId {
-		return nil, ErrSameAccounts
+		return nil, errors2.ErrSameAccounts
 	}
 
 	// get sender user
@@ -28,7 +29,7 @@ func TransferMoney(fromId int, toId int, amount float64) (internalErr error, myE
 
 	// check balance
 	if sender.Balance < amount {
-		return nil, ErrNotEnoughMoney
+		return nil, errors2.ErrNotEnoughMoney
 	}
 
 	// get recipient user

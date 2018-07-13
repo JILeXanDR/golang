@@ -3,9 +3,10 @@ package http_handlers
 import (
 	"net/http"
 	"strconv"
-	"github.com/JILeXanDR/golang/common"
-	"github.com/JILeXanDR/golang/db"
+	"github.com/JILeXanDR/golang/app/db"
 	"fmt"
+	"github.com/JILeXanDR/golang/app/response_writer"
+	"github.com/JILeXanDR/golang/app/services"
 )
 
 // переводить деньги от одного пользователя другому.
@@ -23,16 +24,16 @@ func TransferMoneyHandler(w http.ResponseWriter, r *http.Request) {
 	value, _ := strconv.ParseFloat(amount, 64)
 
 	if fromId == 0 || toId == 0 {
-		common.JsonMessageResponse(w, "Bad user ids", 424)
+		response_writer.JsonMessageResponse(w, "Bad user ids", 424)
 		return
 	}
 
-	internalErr, logicErr := common.TransferMoney(int(fromId), int(toId), value)
+	internalErr, logicErr := services.TransferMoney(int(fromId), int(toId), value)
 	if internalErr != nil {
-		common.InternalServerError(w, internalErr)
+		response_writer.InternalServerError(w, internalErr)
 		return
 	} else if logicErr != nil {
-		common.HandleError(w, logicErr)
+		response_writer.HandleError(w, logicErr)
 		return
 	}
 
@@ -50,5 +51,5 @@ func TransferMoneyHandler(w http.ResponseWriter, r *http.Request) {
 		user.Balance,
 	)
 
-	common.JsonMessageResponse(w, message, 200)
+	response_writer.JsonMessageResponse(w, message, 200)
 }

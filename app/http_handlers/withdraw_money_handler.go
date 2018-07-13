@@ -3,9 +3,10 @@ package http_handlers
 import (
 	"net/http"
 	"strconv"
-	"github.com/JILeXanDR/golang/db"
-	"github.com/JILeXanDR/golang/common"
+	"github.com/JILeXanDR/golang/app/db"
 	"github.com/jinzhu/gorm"
+	"github.com/JILeXanDR/golang/app/response_writer"
+	"github.com/JILeXanDR/golang/errors"
 )
 
 // снимать деньги со счетов
@@ -24,9 +25,9 @@ func WithdrawMoneyHandler(w http.ResponseWriter, r *http.Request) {
 	err := db.Connection.Where(user).First(user).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			common.JsonMessageResponse(w, "User does not exist", 400)
+			response_writer.JsonMessageResponse(w, "User does not exist", 400)
 		} else {
-			common.HandleError(w, err)
+			response_writer.HandleError(w, err)
 		}
 		return
 	}
@@ -34,16 +35,16 @@ func WithdrawMoneyHandler(w http.ResponseWriter, r *http.Request) {
 	value, _ := strconv.ParseFloat(amount, 64)
 
 	if user.Balance < value {
-		common.JsonMessageResponse(w, common.ErrNotEnoughMoney.Error(), 400)
+		response_writer.JsonMessageResponse(w, errors.ErrNotEnoughMoney.Error(), 400)
 		return
 	}
 
 	user.Balance -= value
 	err = db.Connection.Save(user).Error
 	if err != nil {
-		common.HandleError(w, err)
+		response_writer.HandleError(w, err)
 		return
 	}
 
-	common.JsonResponse(w, user, 200)
+	response_writer.JsonResponse(w, user, 200)
 }

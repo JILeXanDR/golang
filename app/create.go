@@ -3,7 +3,7 @@ package app
 import (
 	"github.com/joho/godotenv"
 	"log"
-	"github.com/JILeXanDR/golang/db"
+	"github.com/JILeXanDR/golang/app/db"
 )
 
 var loaded = false

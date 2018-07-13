@@ -3,10 +3,10 @@ package http_handlers
 import (
 	"net/http"
 	"github.com/asaskevich/govalidator"
-	"github.com/JILeXanDR/golang/common"
 	"strconv"
-	"github.com/JILeXanDR/golang/db"
+	"github.com/JILeXanDR/golang/app/db"
 	"github.com/jinzhu/gorm"
+	"github.com/JILeXanDR/golang/app/response_writer"
 )
 
 type BalanceResponse struct {
@@ -23,7 +23,7 @@ func GetBalanceHandler(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if !govalidator.IsInt(userId) {
-		common.ValidationError(w, "Query parameter 'user' is invalid")
+		response_writer.ValidationError(w, "Query parameter 'user' is invalid")
 		return
 	}
 
@@ -32,12 +32,12 @@ func GetBalanceHandler(w http.ResponseWriter, r *http.Request) {
 	user := &db.User{}
 	err := db.Connection.Where(&db.User{Identifier: int(id)}).First(user).Error
 	if err == gorm.ErrRecordNotFound {
-		common.JsonMessageResponse(w, "User does not exist", 404)
+		response_writer.JsonMessageResponse(w, "User does not exist", 404)
 		return
 	} else if err != nil {
-		common.InternalServerError(w, err)
+		response_writer.InternalServerError(w, err)
 		return
 	}
 
-	common.JsonResponse(w, BalanceResponse{Balance: user.Balance}, 200)
+	response_writer.JsonResponse(w, BalanceResponse{Balance: user.Balance}, 200)
 }

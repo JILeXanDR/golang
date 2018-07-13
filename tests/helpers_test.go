@@ -3,8 +3,8 @@ package tests
 import (
 	"testing"
 	"github.com/JILeXanDR/golang/common"
-	"github.com/JILeXanDR/golang/db"
 	"github.com/JILeXanDR/golang/app"
+	"github.com/JILeXanDR/golang/app/db/repositories"
 )
 
 func TestTransferMoneyWithoutBalance(t *testing.T) {
@@ -43,15 +43,15 @@ func TestSuccessfulMoneyTransfer(t *testing.T) {
 		senderId                  = 1
 		recipientId               = 2
 		amount                    = 100.0
-		senderInitialAmount, _    = db.GetUserBalance(senderId)
-		recipientInitialAmount, _ = db.GetUserBalance(recipientId)
+		senderInitialAmount, _    = repositories.GetUserBalance(senderId)
+		recipientInitialAmount, _ = repositories.GetUserBalance(recipientId)
 	)
 
 	common.TransferMoney(senderId, recipientId, amount)
 
 	var (
-		senderFinalAmount, _    = db.GetUserBalance(senderId)
-		recipientFinalAmount, _ = db.GetUserBalance(recipientId)
+		senderFinalAmount, _    = repositories.GetUserBalance(senderId)
+		recipientFinalAmount, _ = repositories.GetUserBalance(recipientId)
 	)
 
 	if ((senderInitialAmount - amount) != senderFinalAmount) || ((recipientInitialAmount + amount) != recipientFinalAmount) {

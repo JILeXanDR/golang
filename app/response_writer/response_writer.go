@@ -1,10 +1,10 @@
-package common
+package response_writer
 
 import (
 	"net/http"
 	"encoding/json"
-	"errors"
 	"os"
+	"errors"
 )
 
 func JsonResponse(w http.ResponseWriter, data interface{}, statusCode int) {
@@ -31,10 +31,10 @@ func InternalServerError(w http.ResponseWriter, err error) {
 	}
 }
 
-func ValidationError(w http.ResponseWriter, message string) {
-	JsonMessageResponse(w, message, 422)
-}
-
 func JsonMessageResponse(w http.ResponseWriter, message string, code int) {
 	JsonResponse(w, map[string]string{"message": message}, code)
+}
+
+func ValidationError(w http.ResponseWriter, message string) {
+	JsonMessageResponse(w, message, 422)
 }

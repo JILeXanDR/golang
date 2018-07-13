@@ -2,11 +2,11 @@ package tests
 
 import (
 	"testing"
-	"github.com/JILeXanDR/golang/maps"
+	"github.com/JILeXanDR/golang/external_api"
 )
 
 func TestSearchAddress(t *testing.T) {
-	places, err := maps.SearchAddress("Добровольського")
+	places, err := external_api.FindAddresses("Добровольського")
 	if err != nil {
 		t.Errorf("api error: %v", err.Error())
 		return

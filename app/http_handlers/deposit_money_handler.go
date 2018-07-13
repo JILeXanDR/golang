@@ -3,10 +3,10 @@ package http_handlers
 import (
 	"net/http"
 	"github.com/asaskevich/govalidator"
-	"github.com/JILeXanDR/golang/common"
 	"strconv"
-	"github.com/JILeXanDR/golang/db"
+	"github.com/JILeXanDR/golang/app/db"
 	"github.com/jinzhu/gorm"
+	"github.com/JILeXanDR/golang/app/response_writer"
 )
 
 // зачислять деньги на счет пользователям (создать пользователя, если еще не существует)
@@ -20,12 +20,12 @@ func DepositMoneyHandler(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if len(userId) == 0 || !govalidator.IsNumeric(userId) {
-		common.ValidationError(w, "Bad user")
+		response_writer.ValidationError(w, "Bad user")
 		return
 	}
 
 	if len(amount) == 0 || !govalidator.IsNumeric(amount) {
-		common.ValidationError(w, "Bad amount")
+		response_writer.ValidationError(w, "Bad amount")
 		return
 	}
 
@@ -40,11 +40,11 @@ func DepositMoneyHandler(w http.ResponseWriter, r *http.Request) {
 			user.Balance = 0
 			err := db.Connection.Create(user).Error
 			if err != nil {
-				common.HandleError(w, err)
+				response_writer.HandleError(w, err)
 				return
 			}
 		} else {
-			common.HandleError(w, err)
+			response_writer.HandleError(w, err)
 			return
 		}
 	}
@@ -54,9 +54,9 @@ func DepositMoneyHandler(w http.ResponseWriter, r *http.Request) {
 	user.Balance += value
 	err = db.Connection.Save(user).Error
 	if err != nil {
-		common.HandleError(w, err)
+		response_writer.HandleError(w, err)
 		return
 	}
 
-	common.JsonResponse(w, user, 200)
+	response_writer.JsonResponse(w, user, 200)
 }

@@ -1,4 +1,4 @@
-package sms
+package external_api
 
 import (
 	"fmt"
@@ -11,12 +11,6 @@ import (
 	"log"
 	"time"
 )
-
-type apiResponse struct {
-	Code    int
-	Message string
-	data    interface{}
-}
 
 type apiRequest struct {
 	ApiKey string `json:"api_key"`

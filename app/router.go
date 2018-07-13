@@ -2,12 +2,12 @@ package app
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/JILeXanDR/golang/http_handlers"
+	"github.com/JILeXanDR/golang/app/http_handlers"
 	"golang.org/x/net/websocket"
 	"github.com/JILeXanDR/golang/app/ws"
 	"net/http"
 	"os"
-	"github.com/JILeXanDR/golang/common"
+	"github.com/JILeXanDR/golang/app/response_writer"
 )
 
 func fileExists(path string) bool {
@@ -27,11 +27,11 @@ func notFoundHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func apiNotFoundHandler(w http.ResponseWriter, r *http.Request) {
-	common.JsonMessageResponse(w, "Endpoint is not defined", 404)
+	response_writer.JsonMessageResponse(w, "Endpoint is not defined", 404)
 }
 
 func apiIndexHandler(w http.ResponseWriter, r *http.Request) {
-	common.JsonMessageResponse(w, "Base API endpoint", 200)
+	response_writer.JsonMessageResponse(w, "Base API endpoint", 200)
 }
 
 func GetRouter() (router *mux.Router) {
@@ -39,7 +39,7 @@ func GetRouter() (router *mux.Router) {
 	router = mux.NewRouter()
 	router.StrictSlash(true)
 
-	//router.Use(loggingMiddleware)
+	router.Use(loggingMiddleware)
 
 	router.NotFoundHandler = http.HandlerFunc(notFoundHandler)
 	router.HandleFunc("/", http_handlers.IndexPageHandler)
