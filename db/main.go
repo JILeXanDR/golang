@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"encoding/json"
 	"github.com/jinzhu/gorm/dialects/postgres"
+	"log"
 )
 
 var Connection *gorm.DB
@@ -28,10 +29,15 @@ func migrations() {
 	Connection.DropTableIfExists(models...)
 	Connection.AutoMigrate(models...)
 
-	// test users
-	Connection.Create(&User{Identifier: 1, Name: "Alexandr", Balance: 1000})
-	Connection.Create(&User{Identifier: 2, Name: "Bob", Balance: 1000})
-	Connection.Create(&User{Identifier: 3, Name: "Test", Balance: 1000})
+	var users = []User{
+		{Identifier: 1, Name: "Alexandr", Balance: 1000, Phone: "380939411685"},
+		{Identifier: 2, Name: "Bob", Balance: 1000, Phone: "380980808421"},
+		{Identifier: 3, Name: "Test", Balance: 1000},
+	}
+
+	for _, user := range users {
+		log.Println(Connection.Create(&user).Error)
+	}
 
 	var list = []string{
 		"Латте апельсиновый (фабрика кофе)",
@@ -44,7 +50,7 @@ func migrations() {
 	}
 
 	var orders = []Order{
-		Order{
+		{
 			Phone:             "0939411685",
 			DeliveryAddressId: "EnHQstGD0LvQuNGG0Y8g0JTQvtCx0YDQvtCy0L7Qu9GM0YHRjNC60L7Qs9C",
 			DeliveryAddress:   "вулиця Добровольського, 6, Черкаси, Черкаська область, Україна",
@@ -52,8 +58,10 @@ func migrations() {
 			Name:              "Саша",
 			Status:            STATUS_CREATED,
 			List:              postgres.Jsonb{metadata},
+			//User:              users[0],
+			UserId: users[0].ID,
 		},
-		Order{
+		{
 			Phone:             "0939411685",
 			DeliveryAddressId: "EnTQstGD0LvQuNGG0Y8g0J7RgdGC0LDRhNGW0Y8g0JTQsNGI0LrQvtCy0LjRh9CwLCAzLCDQp9C10YDQutCw0YHQuCwg0KfQtdGA0LrQsNGB0YzQutCwINC",
 			DeliveryAddress:   "вулиця Остафія Дашковича, 3, Черкаси, Черкаська область, Україна",
@@ -61,11 +69,13 @@ func migrations() {
 			Name:              "Саша",
 			Status:            STATUS_CREATED,
 			List:              postgres.Jsonb{metadata},
+			//User:              users[1],
+			UserId: users[1].ID,
 		},
 	}
 
 	for _, order := range orders {
-		Connection.Create(&order)
+		log.Println(Connection.Create(&order).Error)
 	}
 }
 

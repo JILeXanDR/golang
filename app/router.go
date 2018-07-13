@@ -50,6 +50,7 @@ func GetRouter() (router *mux.Router) {
 
 	api.HandleFunc("", apiIndexHandler)
 
+	api.HandleFunc("/users", http_handlers.GetUsers).Methods("GET")
 	api.HandleFunc("/balance", http_handlers.GetBalanceHandler).Methods("POST")
 	api.HandleFunc("/deposit", http_handlers.DepositMoneyHandler).Methods("POST")
 	api.HandleFunc("/withdraw", http_handlers.WithdrawMoneyHandler).Methods("POST")
