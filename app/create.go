@@ -4,6 +4,7 @@ import (
 	"github.com/joho/godotenv"
 	"log"
 	"github.com/JILeXanDR/golang/app/db"
+	"os"
 )
 
 var loaded = false
@@ -15,6 +16,12 @@ func Create(envFile string) {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+
+	if len(os.Getenv("ENV")) == 0 {
+		panic("ENV is not defined. Check your .env file")
+	}
+
+	log.Printf("Going to start application in '%v' env", os.Getenv("ENV"))
 
 	err = db.Connect()
 	if err != nil {

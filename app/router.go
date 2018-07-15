@@ -56,6 +56,9 @@ func GetRouter() (router *mux.Router) {
 	api.HandleFunc("/withdraw", http_handlers.WithdrawMoneyHandler).Methods("POST")
 	api.HandleFunc("/transfer", http_handlers.TransferMoneyHandler).Methods("POST")
 
+	api.HandleFunc("/confirm-phone", http_handlers.ConfirmPhoneHandler).Methods("POST")
+	api.HandleFunc("/check-code", http_handlers.CheckCodeHandler).Methods("POST")
+
 	orders := api.PathPrefix("/orders").Subrouter()
 
 	orders.HandleFunc("", http_handlers.GetOrdersHandler).Methods("GET")

@@ -28,15 +28,14 @@ type requestOrder struct {
 	Comment         string          `json:"comment"`
 }
 
-func parseBody(r *http.Request) (requestOrder) {
+func ParseRequestJsonBody(r *http.Request, destination *requested) error {
 	decoder := json.NewDecoder(r.Body)
-	var data requestOrder
-	err := decoder.Decode(&data)
+	err := decoder.Decode(&destination)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	return data
+	return nil
 }
 
 func getOrder(r *http.Request) (*db.Order, error) {
@@ -72,8 +71,16 @@ func handleError(w http.ResponseWriter, err error) {
 // создание нового заказа клиентом
 func CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
 
-	var body = parseBody(r)
-	var phoneExample = "0939411685"
+	var body = &requestOrder{}
+
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(body)
+	if err != nil {
+		response_writer.InternalServerError(w, err)
+		return
+	}
+
+	var phoneExample = "0939411685" // TODO use another phone
 
 	// TODO do it better
 	if len(body.Phone) != len(phoneExample) || !strings.HasPrefix(body.Phone, "0") {
@@ -110,7 +117,7 @@ func CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
 // получение списка всех заказов (менеджером по заказам)
 func GetOrdersHandler(w http.ResponseWriter, r *http.Request) {
 	var orders = &[]db.Order{}
-	err := db.Connection.Find(orders).Error
+	err := db.Connection.Order("created_at desc").Find(orders).Error
 	if err != nil {
 		response_writer.InternalServerError(w, err)
 		return

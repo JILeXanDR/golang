@@ -22,9 +22,7 @@
     window.App = Vue.component('app', {
         template: '#template_app',
         data: function () {
-            return {
-                links: [1, 2, 3]
-            }
+            return {}
         },
         created() {
             openWsConnection();

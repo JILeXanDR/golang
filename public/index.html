@@ -2,11 +2,12 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css"
+          integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
     <link href="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.min.css" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
     <link rel="icon" type="image/png" href="/public/favicon.ico"/>
-    <title>SimpleShopping</title>
+    <title>Простые покупки</title>
 </head>
 <body>
 
@@ -22,7 +23,11 @@
             </v-card-text>
 
             <v-card-text class="white--text pt-0">
-                Самые большие удобства иногда работают. Школа траур слой может представлять опасения, что баскетбол в настоящее время. Однако, клинические и массы на главной футбольной моркови стоит. DUIs Commodo жизни, готов и шеи. Lacinia футбол транспортных средств. Там нет пропаганды или инвестировать в баскетбол, беге целенаправленной помощи DUI. Производство электроэнергии или времени элемент в диаметре или так клинический. Различные клинические горы Penatibus Супер Боул мгновенно.
+                Самые большие удобства иногда работают. Школа траур слой может представлять опасения, что баскетбол в
+                настоящее время. Однако, клинические и массы на главной футбольной моркови стоит. DUIs Commodo жизни,
+                готов и шеи. Lacinia футбол транспортных средств. Там нет пропаганды или инвестировать в баскетбол, беге
+                целенаправленной помощи DUI. Производство электроэнергии или времени элемент в диаметре или так
+                клинический. Различные клинические горы Penatibus Супер Боул мгновенно.
             </v-card-text>
 
             <v-divider></v-divider>
@@ -54,158 +59,238 @@
 <template id="template_app">
     <v-app>
         <my-header></my-header>
-        <v-container grid-list-md text-xs-center>
-            <v-layout row wrap>
-                <v-flex xs12>
-                    <router-view></router-view>
-                </v-flex>
-            </v-layout>
-        </v-container>
+        <router-view></router-view>
         <my-footer></my-footer>
     </v-app>
 </template>
 
-<template id="template_order-form">
-    <div>
+<template id="template_home">
+    <v-container grid-list-md text-xs-center>
+        <v-layout row wrap>
+            <v-flex xs12>
+                <div>
 
-        <v-dialog v-model="dialog.visible" persistent max-width="290">
-            <v-card>
-                <v-card-title class="headline">Внимание</v-card-title>
-                <v-card-text>{{ dialog.text }}</v-card-text>
-                <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="green darken-1" flat @click.native="dialog.visible = false">Закрыть</v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
+                    <v-snackbar top v-model="snackbar.visible" color="red" :timeout="snackbar.timeout">{{ snackbar.text }}
+                        <v-btn dark flat @click="snackbar.visible = false">Close</v-btn>
+                    </v-snackbar>
 
-        <v-form @submit.prevent="add()">
+                    <v-dialog v-model="dialogConfirmPhone.visible" persistent width="500">
+                        <v-card>
+                            <v-card-title class="headline grey lighten-2" primary-title>Верификация номера телефона</v-card-title>
+                            <v-card-text>
+                                На ваш номер телефона было отправлен код для подтверждения заказа
+                                <v-text-field v-model="smsCode" label="Код з смс" outline></v-text-field>
+                            </v-card-text>
 
-            <v-container grid-list-md text-xs-center>
-                <v-layout row wrap>
-                    <v-flex xs9>
-                        <v-text-field v-model.trim="item" label='Краткое описание одной единицы товара, например "Большое мак-меню с Макдональдза"' outline :counter="100"></v-text-field>
-                    </v-flex>
-                    <v-flex xs3>
-                        <v-btn outline color="indigo" :large="true" type="submit" :disabled="!item.length">Добавить
+                            <v-divider></v-divider>
+                            <v-card-actions>
+                                <v-spacer></v-spacer>
+                                <v-btn color="primary" flat @click="dialogConfirmPhone.visible = false">Отмена</v-btn>
+                                <v-btn color="primary" flat :disabled="!smsCode" @click="checkSmsCode(smsCode)">Подтвердить</v-btn>
+                            </v-card-actions>
+                        </v-card>
+                    </v-dialog>
+
+                    <v-dialog v-model="dialog.visible" persistent max-width="290">
+                        <v-card>
+                            <v-card-title class="headline">Внимание</v-card-title>
+                            <v-card-text>{{ dialog.text }}</v-card-text>
+                            <v-card-actions>
+                                <v-spacer></v-spacer>
+                                <v-btn color="green darken-1" flat @click.native="dialog.visible = false">Закрыть</v-btn>
+                            </v-card-actions>
+                        </v-card>
+                    </v-dialog>
+
+                    <v-form @submit.prevent="add()">
+
+                        <v-container grid-list-md text-xs-center>
+                            <v-layout row wrap>
+                                <v-flex xs9>
+                                    <v-text-field v-model.trim="item"
+                                                  label='Краткое описание одной единицы товара, например "Большое мак-меню с Макдональдза"'
+                                                  outline :counter="100"></v-text-field>
+                                </v-flex>
+                                <v-flex xs3>
+                                    <v-btn outline color="indigo" :large="true" type="submit" :disabled="!item.length">Добавить
+                                    </v-btn>
+                                </v-flex>
+                            </v-layout>
+                        </v-container>
+
+                        <v-card>
+                            <v-toolbar card color="indigo" dark dense>
+                                <v-toolbar-title class="body-2">Список покупок</v-toolbar-title>
+                            </v-toolbar>
+
+                            <v-list two-line subheader v-if="form.list.length">
+                                <v-list-tile v-for="(item, index) in form.list" :key="index" avatar @click="">
+                                    <v-list-tile-avatar>
+                                        <v-icon class="grey lighten-1 white--text">fas fa-shopping-basket</v-icon>
+                                    </v-list-tile-avatar>
+
+                                    <v-list-tile-content>
+                                        <v-list-tile-title>{{ item }}</v-list-tile-title>
+                                    </v-list-tile-content>
+
+                                    <v-list-tile-action>
+                                        <v-tooltip bottom>
+                                            <v-btn flat icon color="red" @click="remove(item)" slot="activator">
+                                                <v-icon>fas fa-trash-alt</v-icon>
+                                            </v-btn>
+                                            <span>удалить</span>
+                                        </v-tooltip>
+                                    </v-list-tile-action>
+                                </v-list-tile>
+                            </v-list>
+
+                            <v-card-text v-else>
+                                <h4>Вы пока что ничего не добавили</h4>
+                            </v-card-text>
+                        </v-card>
+
+                    </v-form>
+
+                    <v-form>
+                        <v-container>
+                            <v-layout row wrap>
+
+                                <v-flex xs12 sm3>
+                                    <v-text-field v-model="form.name" label="Имя" outline></v-text-field>
+                                </v-flex>
+
+                                <v-flex xs12 sm4>
+                                    <v-text-field v-model="form.phone" mask="phone" label="Номер телефона" outline></v-text-field>
+                                </v-flex>
+
+                                <v-flex xs12 sm5>
+                                    <v-autocomplete
+                                            outline
+                                            v-model="form.delivery_address"
+                                            :items="items"
+                                            :search-input.sync="search"
+                                            label="Адресавки"
+                                            placeholder="Начните ввод для поиска"
+                                            return-object
+                                            item-text="name"
+                                            item-value="value"
+                                            :clearable="true"
+                                            append-icon=""
+                                            clear-icon="fas fa-backspace"
+                                    ></v-autocomplete>
+                                </v-flex>
+
+                                <v-flex xs12>
+                                    <v-textarea v-model="form.comment" outline label="Примечание к заказу"></v-textarea>
+                                </v-flex>
+
+                            </v-layout>
+                        </v-container>
+                    </v-form>
+                    <div class="text-xs-center">
+                        <v-btn :disabled="loader || !isFormValid()" :loading="loader" outline color="indigo" @click="confirm()">
+                            Подтвердить заказ
                         </v-btn>
-                    </v-flex>
-                </v-layout>
-            </v-container>
-
-            <v-card>
-                <v-toolbar card color="indigo" dark dense>
-                    <v-toolbar-title class="body-2">Список покупок</v-toolbar-title>
-                </v-toolbar>
-
-                <v-list two-line subheader v-if="form.list.length">
-                    <v-list-tile v-for="(item, index) in form.list" :key="index" avatar @click="">
-                        <v-list-tile-avatar>
-                            <v-icon class="grey lighten-1 white--text">shopping_cart</v-icon>
-                        </v-list-tile-avatar>
-
-                        <v-list-tile-content>
-                            <v-list-tile-title>{{ item }}</v-list-tile-title>
-                        </v-list-tile-content>
-
-                        <v-list-tile-action>
-                            <v-tooltip bottom>
-                                <v-btn flat icon color="red" @click="remove(item)" slot="activator">
-                                    <v-icon>delete</v-icon>
-                                </v-btn>
-                                <span>удалить</span>
-                            </v-tooltip>
-                        </v-list-tile-action>
-                    </v-list-tile>
-                </v-list>
-
-                <v-card-text v-else>
-                    <h4>Вы пока что ничего не добавили</h4>
-                </v-card-text>
-            </v-card>
-
-        </v-form>
-
-        <v-form>
-            <v-container>
-                <v-layout row wrap>
-
-                    <v-flex xs12 sm3>
-                        <v-text-field v-model="form.name" label="Имя" outline></v-text-field>
-                    </v-flex>
-
-                    <v-flex xs12 sm4>
-                        <v-text-field v-model="form.phone" mask="phone" label="Номер телефона" outline></v-text-field>
-                    </v-flex>
-
-                    <v-flex xs12 sm5>
-                        <v-autocomplete
-                                outline
-                                v-model="form.delivery_address"
-                                :items="items"
-                                :search-input.sync="search"
-                                label="Адресавки"
-                                placeholder="Начните ввод для поиска"
-                                return-object
-                                item-text="name"
-                                item-value="value"
-                                :clearable="true"
-                        ></v-autocomplete>
-                    </v-flex>
-
-                    <v-flex xs12>
-                        <v-textarea v-model="form.comment" outline label="Примечание к заказу"></v-textarea>
-                    </v-flex>
-
-                </v-layout>
-            </v-container>
-        </v-form>
-        <div class="text-xs-center">
-            <v-btn :disabled="loader || !isFormValid()" :loading="loader" outline color="indigo" @click="confirm()">Подтвердить заказ</v-btn>
-        </div>
-        <v-dialog v-model="loader" hide-overlay persistent width="300">
-            <v-card color="primary" dark>
-                <v-card-text>
-                    Оформления заказа...
-                    <v-progress-linear indeterminate color="white" class="mb-0"></v-progress-linear>
-                </v-card-text>
-            </v-card>
-        </v-dialog>
-    </div>
+                    </div>
+                    <v-dialog v-model="loader" hide-overlay persistent width="300">
+                        <v-card color="primary" dark>
+                            <v-card-text>
+                                Оформления заказа...
+                                <v-progress-linear indeterminate color="white" class="mb-0"></v-progress-linear>
+                            </v-card-text>
+                        </v-card>
+                    </v-dialog>
+                </div>
+            </v-flex>
+        </v-layout>
+    </v-container>
 </template>
 
 <template id="tpl_orders">
     <div>
-        <v-data-table
-                :headers="headers"
-                :items="orders"
-                hide-actions
-                item-key="name"
-        >
-            <template slot="items" slot-scope="props">
-                <tr>
-                    <td>{{ props.item.ID }}</td>
-                    <td class="text-xs-left">
-                        <div v-for="item in props.item.list">{{ item }}</div>
-                    </td>
-                    <td class="text-xs-left">{{ props.item.status }}</td>
-                    <td class="text-xs-left">{{ props.item.phone }}</td>
-                    <td class="text-xs-left">{{ props.item.delivery_address }}</td>
-                    <td class="text-xs-left">{{ props.item.comment }}</td>
-                    <td class="text-xs-left">{{ props.item.CreatedAt | date }}</td>
-                </tr>
-            </template>
-            <template slot="expand" slot-scope="props">
-                <v-card flat>
-                    <v-card-text>Peek-a-boo!</v-card-text>
-                </v-card>
-            </template>
-        </v-data-table>
+        <v-toolbar color="indigo" dark tabs>
+            <v-tabs slot="extension" v-model="filterStatus" centered color="cyan" slider-color="red">
+                <v-tab href="#new">Новые</v-tab>
+                <v-tab href="#done">Завершенные</v-tab>
+            </v-tabs>
+        </v-toolbar>
+        <v-tabs-items v-model="filterStatus">
+            <v-tab-item id="new">
+                <orders-table :data="newOrders"></orders-table>
+            </v-tab-item>
+            <v-tab-item id="done">
+                <orders-table :data="doneOrders"></orders-table>
+            </v-tab-item>
+        </v-tabs-items>
     </div>
 </template>
 
+<template id="tpl_orders-table">
+    <v-data-table :headers="headers" :items="data" hide-actions item-key="name">
+        <template slot="items" slot-scope="props">
+            <tr>
+                <td class="text-xs-left">
+                    <v-chip small color="grey" text-color="black" v-for="(item, index) in props.item.list" :key="item">{{ item }}</v-chip>
+                </td>
+                <td class="text-xs-left">{{ props.item.phone | phone }}</td>
+                <td class="text-xs-left">
+                    <v-tooltip top v-if="props.item.comment">
+                        <span slot="activator">{{ props.item.delivery_address }}</span>
+                        <span>{{ props.item.comment }}</span>
+                    </v-tooltip>
+                    <template v-else>{{ props.item.delivery_address }}</template>
+                </td>
+                <td class="text-xs-left">
+                    <v-chip disabled small label v-if="props.item.status === 'created'" color="black" text-color="white">
+                        <v-avatar>
+                            <v-icon>fas fa-cart-plus</v-icon>
+                        </v-avatar>
+                        создан
+                    </v-chip>
+                    <v-chip disabled small label v-else-if="props.item.status === 'confirmed'" color="green" text-color="white">
+                        <v-avatar>
+                            <v-icon>fas fa-check-circle</v-icon>
+                        </v-avatar>
+                        подтвержден
+                    </v-chip>
+                    <v-chip disabled small label v-else-if="props.item.status === 'canceled'" color="red" text-color="white">
+                        <v-avatar>
+                            <v-icon>fas fa-minus-circle</v-icon>
+                        </v-avatar>
+                        отменен
+                    </v-chip>
+                    <v-chip disabled small label v-else-if="props.item.status === 'processing'" color="teal" text-color="white">
+                        <v-avatar>
+                            <v-icon>fas fa-walking</v-icon>
+                        </v-avatar>
+                        в обработке
+                    </v-chip>
+                    <v-chip disabled small label v-else-if="props.item.status === 'delivered'" color="blue" text-color="white">
+                        <v-avatar>
+                            <v-icon>far fa-money-bill-alt</v-icon>
+                        </v-avatar>
+                        доставлен
+                    </v-chip>
+                </td>
+                <td class="text-xs-left">
+                    <v-tooltip top>
+                        <span slot="activator">{{ props.item.created_at | timeLeft }}</span>
+                        <span>{{ props.item.created_at | date }}</span>
+                    </v-tooltip>
+                </td>
+            </tr>
+        </template>
+    </v-data-table>
+</template>
+
 <template id="tpl_about-us">
-    <h1>О нас</h1>
+    <v-container grid-list-md text-xs-center>
+        <v-layout row wrap>
+            <v-flex xs12>
+                <h1>О нас</h1>
+            </v-flex>
+        </v-layout>
+    </v-container>
 </template>
 
 <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
@@ -213,11 +298,13 @@
 <script src="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
 <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment-with-locales.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.10.0/js/md5.min.js"></script>
 
 <script src="/public/js/utils.js"></script>
 <script src="/public/js/my-header.js"></script>
 <script src="/public/js/my-footer.js"></script>
-<script src="/public/js/order-form.js"></script>
+<script src="/public/js/home.js"></script>
 <script src="/public/js/orders.js"></script>
 <script src="/public/js/about-us.js"></script>
 <script src="/public/js/app.js"></script>

@@ -1,25 +1,19 @@
-Vue.component('orders', {
-    template: '#tpl_orders',
+Vue.component('orders-table', {
+    template: '#tpl_orders-table',
+    props: {
+        data: {
+            type: Array,
+            required: true,
+        },
+    },
     data: function () {
         return {
             headers: [
-                {
-                    text: 'ID',
-                    align: 'left',
-                    sortable: false,
-                    value: 'id'
-                },
                 {
                     text: 'Покупки',
                     align: 'left',
                     sortable: false,
                     value: 'list'
-                },
-                {
-                    text: 'Статус',
-                    align: 'left',
-                    sortable: false,
-                    value: 'status'
                 },
                 {
                     text: 'Номер телефона',
@@ -34,10 +28,10 @@ Vue.component('orders', {
                     value: 'delivery_address'
                 },
                 {
-                    text: 'Примечание',
+                    text: 'Статус',
                     align: 'left',
                     sortable: false,
-                    value: 'comment'
+                    value: 'status'
                 },
                 {
                     text: 'Создан',
@@ -46,7 +40,35 @@ Vue.component('orders', {
                     value: 'created_at'
                 },
             ],
+        }
+    },
+});
+
+
+Vue.component('orders', {
+    template: '#tpl_orders',
+    data: function () {
+        return {
+            filterStatus: 'new',
+            tabs: [
+                {
+                    id: 'new',
+                    name: 'Новые',
+                },
+                {
+                    id: 'done',
+                    name: 'Выполненные',
+                }
+            ],
             orders: [],
+        }
+    },
+    computed: {
+        newOrders() {
+            return this.orders.filter((order) => ['created', 'confirmed', 'processing'].includes(order.status));
+        },
+        doneOrders() {
+            return this.orders.filter((order) => ['canceled', 'delivered'].includes(order.status));
         }
     },
     created() {

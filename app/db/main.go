@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"log"
+	"time"
 )
 
 var Connection *gorm.DB
@@ -29,36 +30,72 @@ func migrations() {
 		log.Println(Connection.Create(&user).Error)
 	}
 
-	var list = []string{
-		"Латте апельсиновый (фабрика кофе)",
-		"мак-меню",
+	var geList = func(list []string) postgres.Jsonb {
+		metadata, err := json.Marshal(list)
+		if err != nil {
+			panic(err)
+		}
+		return postgres.Jsonb{metadata}
 	}
 
-	metadata, err := json.Marshal(list)
-	if err != nil {
-		panic(err)
-	}
+	fiveDaysAgoDuration, _ := time.ParseDuration("-120h")
+	fiveDaysAgo := time.Now().Add(fiveDaysAgoDuration)
 
 	var orders = []Order{
 		{
-			Phone:             "0939411685",
+			Phone:             "380939411685",
 			DeliveryAddressId: "EnHQstGD0LvQuNGG0Y8g0JTQvtCx0YDQvtCy0L7Qu9GM0YHRjNC60L7Qs9C",
 			DeliveryAddress:   "вулиця Добровольського, 6, Черкаси, Черкаська область, Україна",
 			Comment:           "4 подъезд квартира 117",
 			Name:              "Саша",
 			Status:            STATUS_CREATED,
-			List:              postgres.Jsonb{metadata},
+			List:              geList([]string{"Латте апельсиновый (фабрика кофе)", "мак-меню"}),
+			CreatedAt:         fiveDaysAgo,
 			//User:              users[0],
 			UserId: users[0].ID,
 		},
 		{
-			Phone:             "0939411685",
+			Phone:             "380939411685",
 			DeliveryAddressId: "EnTQstGD0LvQuNGG0Y8g0J7RgdGC0LDRhNGW0Y8g0JTQsNGI0LrQvtCy0LjRh9CwLCAzLCDQp9C10YDQutCw0YHQuCwg0KfQtdGA0LrQsNGB0YzQutCwINC",
 			DeliveryAddress:   "вулиця Остафія Дашковича, 3, Черкаси, Черкаська область, Україна",
 			Comment:           "",
 			Name:              "Саша",
-			Status:            STATUS_CREATED,
-			List:              postgres.Jsonb{metadata},
+			Status:            STATUS_CONFIRMED,
+			List:              geList([]string{"Латте апельсиновый (фабрика кофе)", "мак-меню"}),
+			//User:              users[1],
+			UserId: users[1].ID,
+		},
+		{
+			Phone:             "380939411685",
+			DeliveryAddressId: "EnTQstGD0LvQuNGG0Y8g0J7RgdGC0LDRhNGW0Y8g0JTQsNGI0LrQvtCy0LjRh9CwLCAzLCDQp9C10YDQutCw0YHQuCwg0KfQtdGA0LrQsNGB0YzQutCwINC",
+			DeliveryAddress:   "вулиця Остафія Дашковича, 3, Черкаси, Черкаська область, Україна",
+			Comment:           "",
+			Name:              "Саша",
+			Status:            STATUS_CANCELED,
+			List:              geList([]string{"Латте апельсиновый (фабрика кофе)", "мак-меню"}),
+			//User:              users[1],
+			UserId: users[1].ID,
+		},
+		{
+			Phone:             "380939411685",
+			DeliveryAddressId: "EnTQstGD0LvQuNGG0Y8g0J7RgdGC0LDRhNGW0Y8g0JTQsNGI0LrQvtCy0LjRh9CwLCAzLCDQp9C10YDQutCw0YHQuCwg0KfQtdGA0LrQsNGB0YzQutCwINC",
+			DeliveryAddress:   "вулиця Остафія Дашковича, 3, Черкаси, Черкаська область, Україна",
+			Comment:           "",
+			Name:              "Саша",
+			Status:            STATUS_PROCESSING,
+			List:              geList([]string{"Круасан с малиной (Львовский круасан)", "Латте большой"}),
+			//User:              users[1],
+			UserId: users[1].ID,
+		},
+		{
+			Phone:             "380939411685",
+			DeliveryAddressId: "EnTQstGD0LvQuNGG0Y8g0J7RgdGC0LDRhNGW0Y8g0JTQsNGI0LrQvtCy0LjRh9CwLCAzLCDQp9C10YDQutCw0YHQuCwg0KfQtdGA0LrQsNGB0YzQutCwINC",
+			DeliveryAddress:   "вулиця Остафія Дашковича, 3, Черкаси, Черкаська область, Україна",
+			Comment:           "ничего",
+			Name:              "Саша",
+			Status:            STATUS_DELIVERED,
+			List:              geList([]string{"Латте апельсиновый (фабрика кофе)"}),
+			CreatedAt:         fiveDaysAgo,
 			//User:              users[1],
 			UserId: users[1].ID,
 		},

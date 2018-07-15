@@ -2,7 +2,7 @@ const routes = [
     {
         path: '/',
         name: 'home',
-        component: {template: '<order-form></order-form>'},
+        component: {template: '<home></home>'},
     },
     {
         path: '/orders',
@@ -21,9 +21,18 @@ const router = new VueRouter({
     routes
 });
 
+moment.locale('ru');
+
 Vue.filter('date', function (date) {
-    var d = new Date(date);
-    return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+    return moment(date).format("dddd, MMMM Do YYYY, H:mm:ss");
+});
+
+Vue.filter('timeLeft', function (date) {
+    return moment(date).from(moment());
+});
+
+Vue.filter('phone', function (phone) {
+    return phone.replace(/[^0-9]/g, '').replace(/(\d{3})(\d{2})(\d{2})(\d{3})/, '($1) $2-$2-$3');
 });
 
 new Vue({

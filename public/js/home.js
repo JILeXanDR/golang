@@ -1,5 +1,5 @@
-Vue.component('order-form', {
-    template: '#template_order-form',
+Vue.component('home', {
+    template: '#template_home',
     data: function () {
         return {
             item: '',
@@ -16,8 +16,20 @@ Vue.component('order-form', {
                 visible: false,
                 text: '',
             },
+            dialogConfirmPhone: {
+                visible: false,
+                text: '',
+            },
             items: [],
             isLoading: false,
+            phoneConfirmed: false,
+            smsCode: '',
+            md5: '',
+            snackbar: {
+                visible: false,
+                text: '',
+                timeout: 3000,
+            },
         }
     },
     created() {
@@ -45,6 +57,11 @@ Vue.component('order-form', {
                 this.dialog.visible = true;
             }.bind(this);
 
+            if (!this.phoneConfirmed) {
+                this.dialogConfirmPhone.visible = true;
+                return;
+            }
+
             var waiter = minimalDelay(500);
 
             this.loader = true;
@@ -63,12 +80,28 @@ Vue.component('order-form', {
                 });
             }).catch(function (err) {
                 waiter(function () {
+                    this.error(err.body.message);
                     showDialog(err.body.message);
                 });
             });
         },
         isFormValid() {
             return this.form.list.length && this.form.phone && this.form.name && this.form.delivery_address;
+        },
+        checkSmsCode(code) {
+            this.$http.post('/api/check-code', {code})
+                .then(res => {
+                    this.phoneConfirmed = true;
+                    this.dialogConfirmPhone.visible = false;
+                    this.confirm();
+                })
+                .catch(err => {
+                    this.error(err.body.message);
+                });
+        },
+        error(text) {
+            this.snackbar.visible = true;
+            this.snackbar.text = text;
         }
     },
     watch: {
@@ -79,18 +112,6 @@ Vue.component('order-form', {
             deep: true
         },
         search(val) {
-
-            // if (this.form.delivery_address && val === null) {
-            //     return;
-            // }
-
-            // console.log(this.form.delivery_address);
-
-            // if (typeof val === "object" && val !== null && val.value) {
-            //     return;
-            // }
-
-            // console.log({val, type: typeof val});
 
             this.isLoading = true;
 
@@ -104,11 +125,30 @@ Vue.component('order-form', {
                     });
                 })
                 .catch(err => {
-                    console.log(err)
+                    this.error(err.body.message);
                 })
                 .finally(function () {
                     this.isLoading = false;
                 })
+        },
+        'dialogConfirmPhone.visible': function (val) {
+            if (val) {
+                this.$http.post('/api/confirm-phone', {phone: this.form.phone})
+                    .then(res => {
+                        this.md5 = res.body.md5;
+                    })
+                    .catch(err => {
+                        this.error(err.body.message);
+                    })
+            } else {
+                this.md5 = this.smsCode = '';
+            }
+        },
+        smsCode: function (val) {
+            // TODO use double hash
+            if (this.md5 === md5(val)) {
+                this.checkSmsCode(val);
+            }
         }
     }
 });

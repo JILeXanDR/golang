@@ -3,6 +3,7 @@ package db
 import (
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"time"
+	"strings"
 )
 
 //type model struct {
@@ -69,4 +70,10 @@ type Order struct {
 	DeliveredAt       time.Time      `gorm:"default NULL" json:"delivered_at"`
 	User              User           `gorm:"foreignkey:UserId" json:"user"`
 	UserId            uint           `json:"user_id"`
+}
+
+func (order *Order) AfterFind() (err error) {
+	// FIXME
+	order.DeliveryAddress = strings.Replace(order.DeliveryAddress, ", Черкаси, Черкаська область, Україна", "", -1)
+	return
 }
