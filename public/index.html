@@ -169,7 +169,7 @@
                                             v-model="form.delivery_address"
                                             :items="items"
                                             :search-input.sync="search"
-                                            label="Адресавки"
+                                            label="Адрес доставки"
                                             placeholder="Начните ввод для поиска"
                                             return-object
                                             item-text="name"
@@ -188,7 +188,7 @@
                         </v-container>
                     </v-form>
                     <div class="text-xs-center">
-                        <v-btn :disabled="loader || !isFormValid()" :loading="loader" outline color="indigo" @click="confirm()">
+                        <v-btn :disabled="loader || !isFormValid()" :loading="loader" outline color="indigo" @click="confirmOrder()">
                             Подтвердить заказ
                         </v-btn>
                     </div>

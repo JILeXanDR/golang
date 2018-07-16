@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"os"
 	"errors"
+	"log"
 )
 
 func JsonResponse(w http.ResponseWriter, data interface{}, statusCode int) {
@@ -23,8 +24,8 @@ func HandleError(w http.ResponseWriter, err error) {
 }
 
 func InternalServerError(w http.ResponseWriter, err error) {
+	log.Println(err)
 	if os.Getenv("ENV") == "dev" {
-		panic(err)
 		HandleError(w, err)
 	} else {
 		HandleError(w, errors.New("Internal Server Error"))

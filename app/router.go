@@ -40,6 +40,7 @@ func GetRouter() (router *mux.Router) {
 	router.StrictSlash(true)
 
 	router.Use(loggingMiddleware)
+	router.Use(headerMiddleware)
 
 	router.NotFoundHandler = http.HandlerFunc(notFoundHandler)
 	router.HandleFunc("/", http_handlers.IndexPageHandler)

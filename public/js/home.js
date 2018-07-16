@@ -21,8 +21,7 @@ Vue.component('home', {
                 text: '',
             },
             items: [],
-            isLoading: false,
-            phoneConfirmed: false,
+            // phoneConfirmed: false,
             smsCode: '',
             md5: '',
             snackbar: {
@@ -37,6 +36,10 @@ Vue.component('home', {
         if (this.form.delivery_address) {
             this.search = this.form.delivery_address.name;
         }
+        this.$on('orderCreated', function () {
+            this.form.list = []; // TODO не работает
+            this.$router.push({name: 'orders'})
+        });
     },
     methods: {
         add() {
@@ -44,46 +47,42 @@ Vue.component('home', {
             this.item = '';
         },
         remove(item) {
-            var index = this.form.list.indexOf(item);
-            this.form.list.splice(index, 1);
+            this.form.list.splice(this.form.list.indexOf(item), 1);
         },
-        confirm() {
+        confirmOrder() {
 
-            var self = this;
-
-            var showDialog = function (text) {
+            let showDialog = (text) => {
                 this.loader = false;
                 this.dialog.text = text;
                 this.dialog.visible = true;
-            }.bind(this);
+            };
 
-            if (!this.phoneConfirmed) {
-                this.dialogConfirmPhone.visible = true;
-                return;
-            }
+            // if (!this.phoneConfirmed) {
+            //     this.dialogConfirmPhone.visible = true;
+            //     return;
+            // }
 
-            var waiter = minimalDelay(500);
+            let waiter = minimalDelay(500);
 
             this.loader = true;
 
-            this.$http.post('/api/orders', this.form).then(function (res) {
-                waiter(function () {
-                    showDialog('Заказ оформлен. Ожидайте СМС с подтверждением заказа');
-                    var unwatch = self.$watch('dialog.visible', function (newValue, oldValue) {
-                        // dialog was closed
-                        if (!newValue) {
-                            unwatch();
-                            self.form.list = []; // TODO не работает
-                            self.$router.push({name: 'orders'})
-                        }
-                    });
+            this.$http.post('/api/orders', this.form).then(res => waiter(() => {
+                showDialog('Заказ оформлен. Ожидайте СМС с подтверждением заказа');
+                let unwatch = this.$watch('dialog.visible', (newValue, oldValue) => {
+                    // dialog was closed
+                    if (!newValue) {
+                        unwatch();
+                        this.$emit('orderCreated');
+                    }
                 });
-            }).catch(function (err) {
-                waiter(function () {
+            })).catch((err) => waiter(() => {
+                if (err.status === 401) {
+                    this.dialogConfirmPhone.visible = true;
+                } else {
                     this.error(err.body.message);
-                    showDialog(err.body.message);
-                });
-            });
+                    // showDialog(err.body.message);
+                }
+            }));
         },
         isFormValid() {
             return this.form.list.length && this.form.phone && this.form.name && this.form.delivery_address;
@@ -91,13 +90,11 @@ Vue.component('home', {
         checkSmsCode(code) {
             this.$http.post('/api/check-code', {code})
                 .then(res => {
-                    this.phoneConfirmed = true;
+                    // this.phoneConfirmed = true;
                     this.dialogConfirmPhone.visible = false;
-                    this.confirm();
+                    this.confirmOrder();
                 })
-                .catch(err => {
-                    this.error(err.body.message);
-                });
+                .catch(err => this.error(err.body.message));
         },
         error(text) {
             this.snackbar.visible = true;
@@ -112,9 +109,6 @@ Vue.component('home', {
             deep: true
         },
         search(val) {
-
-            this.isLoading = true;
-
             this.$http.get('/find-address', {params: {q: val}})
                 .then(res => {
                     this.items = res.data.map(function (item) {
@@ -124,31 +118,29 @@ Vue.component('home', {
                         };
                     });
                 })
-                .catch(err => {
-                    this.error(err.body.message);
-                })
-                .finally(function () {
-                    this.isLoading = false;
-                })
+                .catch(err => this.error(err.body.message));
         },
         'dialogConfirmPhone.visible': function (val) {
             if (val) {
                 this.$http.post('/api/confirm-phone', {phone: this.form.phone})
                     .then(res => {
                         this.md5 = res.body.md5;
+                        setTimeout(() => {
+                            // TODO for fast dev
+                            if (res.body.code) {
+                                this.smsCode = String(res.body.code);
+                            }
+                        }, 1000);
                     })
-                    .catch(err => {
-                        this.error(err.body.message);
-                    })
+                    .catch(err => this.error(err.body.message))
             } else {
                 this.md5 = this.smsCode = '';
             }
         },
         smsCode: function (val) {
-            // TODO use double hash
-            if (this.md5 === md5(val)) {
+            if (this.md5 === md5(md5(val))) {
                 this.checkSmsCode(val);
             }
         }
-    }
+    },
 });

@@ -5,6 +5,12 @@ import (
 	"github.com/JILeXanDR/golang/app/db"
 	"github.com/jinzhu/gorm"
 	errors2 "github.com/JILeXanDR/golang/errors"
+	"strconv"
+	"fmt"
+	"math/rand"
+	"crypto/md5"
+	"io"
+	"strings"
 )
 
 // transfer money from one user to another user
@@ -60,4 +66,48 @@ func TransferMoney(fromId int, toId int, amount float64) (internalErr error, myE
 	transaction.Commit()
 
 	return nil, nil
+}
+
+// TODO fix bad random
+func GenerateSmsCode() int {
+	code, err := strconv.Atoi(fmt.Sprintf(
+		"%v%v%v%v",
+		rand.Intn(9),
+		rand.Intn(9),
+		rand.Intn(9),
+		rand.Intn(9),
+	))
+
+	if err != nil {
+		return 0 // TODO fix
+	}
+
+	return code
+}
+
+func ToMd5(data string) (res string) {
+	h := md5.New()
+	io.WriteString(h, data)
+	res = fmt.Sprintf("%x", h.Sum(nil))
+
+	return res
+}
+
+func DoubleMd5(data string) (res string) {
+	return ToMd5(ToMd5(data))
+}
+
+func NormalizePhone(phone string) (string, error) {
+	if len(phone) != 10 {
+		return "", errors.New("Bad phone length")
+	}
+	if !strings.HasPrefix(phone, "0") {
+		return "", errors.New("Bad phone format")
+	}
+	return "38" + phone, nil
+}
+
+type PhoneSession struct {
+	Phone     string
+	Confirmed bool
 }

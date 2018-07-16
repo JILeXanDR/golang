@@ -9,10 +9,12 @@ import (
 	"time"
 	"github.com/gorilla/mux"
 	"strconv"
-	"strings"
 	"github.com/jinzhu/gorm"
 	"github.com/JILeXanDR/golang/external_api"
 	"github.com/JILeXanDR/golang/app/response_writer"
+	"github.com/JILeXanDR/golang/app/services"
+	"github.com/JILeXanDR/golang/app/session"
+	"log"
 )
 
 type deliveryAddress struct {
@@ -26,16 +28,6 @@ type requestOrder struct {
 	DeliveryAddress deliveryAddress `json:"delivery_address"`
 	Name            string          `json:"name"`
 	Comment         string          `json:"comment"`
-}
-
-func ParseRequestJsonBody(r *http.Request, destination *requested) error {
-	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&destination)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func getOrder(r *http.Request) (*db.Order, error) {
@@ -69,6 +61,7 @@ func handleError(w http.ResponseWriter, err error) {
 }
 
 // создание нового заказа клиентом
+// необходима авторизация номера телефона
 func CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
 
 	var body = &requestOrder{}
@@ -80,15 +73,25 @@ func CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var phoneExample = "0939411685" // TODO use another phone
+	phone, err := services.NormalizePhone(body.Phone)
 
-	// TODO do it better
-	if len(body.Phone) != len(phoneExample) || !strings.HasPrefix(body.Phone, "0") {
-		response_writer.JsonMessageResponse(w, "Номер телефона введен неверно", http.StatusUnprocessableEntity)
+	sess, err := session.GetSession(r)
+	if err != nil {
+		response_writer.InternalServerError(w, err)
+		return
+	}
+	var phoneSession = sess.Values["auth"].(services.PhoneSession)
+	log.Printf("phone confirmed=%v", phoneSession.Confirmed)
+	//phoneSession.Confirmed = false
+	if !phoneSession.Confirmed || phoneSession.Phone != phone {
+		response_writer.JsonMessageResponse(w, "Номер телефона не авторизован", http.StatusUnauthorized)
 		return
 	}
 
-	var phone = "38" + body.Phone
+	if err != nil {
+		response_writer.JsonMessageResponse(w, "Номер телефона введен неверно", http.StatusUnprocessableEntity)
+		return
+	}
 
 	metadata, err := json.Marshal(body.List)
 
@@ -116,8 +119,19 @@ func CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
 
 // получение списка всех заказов (менеджером по заказам)
 func GetOrdersHandler(w http.ResponseWriter, r *http.Request) {
+
+	sess, _ := session.GetSession(r)
+	phoneSession := sess.Values["auth"].(services.PhoneSession)
+
+	if !phoneSession.Confirmed {
+		response_writer.JsonMessageResponse(w, "Сессия не активна", 401)
+		return
+	}
+
+	log.Println(phoneSession.Phone)
+
 	var orders = &[]db.Order{}
-	err := db.Connection.Order("created_at desc").Find(orders).Error
+	err := db.Connection.Order("created_at desc").Where(&db.Order{Phone: phoneSession.Phone}).Find(orders).Error
 	if err != nil {
 		response_writer.InternalServerError(w, err)
 		return

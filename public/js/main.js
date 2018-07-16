@@ -32,6 +32,7 @@ Vue.filter('timeLeft', function (date) {
 });
 
 Vue.filter('phone', function (phone) {
+    return phone.replace(/^(38)+/, '');
     return phone.replace(/[^0-9]/g, '').replace(/(\d{3})(\d{2})(\d{2})(\d{3})/, '($1) $2-$2-$3');
 });
 
