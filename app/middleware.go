@@ -17,10 +17,11 @@ func loggingMiddleware(next http.Handler) http.Handler {
 func headerMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		sess, _ := session.GetSession(r)
-		var phoneSession = sess.Values["auth"].(services.PhoneSession)
 
-		if phoneSession.Confirmed {
-			w.Header().Set("Phone", phoneSession.Phone)
+		if auth := sess.Values["auth"]; auth != nil {
+			if phoneSession := auth.(services.PhoneSession); phoneSession.Confirmed {
+				w.Header().Set("Phone", phoneSession.Phone)
+			}
 		}
 
 		next.ServeHTTP(w, r)

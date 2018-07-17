@@ -14,7 +14,6 @@ import (
 	"github.com/JILeXanDR/golang/app/response_writer"
 	"github.com/JILeXanDR/golang/app/services"
 	"github.com/JILeXanDR/golang/app/session"
-	"log"
 )
 
 type deliveryAddress struct {
@@ -80,10 +79,17 @@ func CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
 		response_writer.InternalServerError(w, err)
 		return
 	}
-	var phoneSession = sess.Values["auth"].(services.PhoneSession)
-	log.Printf("phone confirmed=%v", phoneSession.Confirmed)
-	//phoneSession.Confirmed = false
-	if !phoneSession.Confirmed || phoneSession.Phone != phone {
+	auth := sess.Values["auth"]
+
+	if auth != nil {
+		var phoneSession = auth.(services.PhoneSession)
+		//log.Printf("phone confirmed=%v", phoneSession.Confirmed)
+		//phoneSession.Confirmed = false
+		if !phoneSession.Confirmed || phoneSession.Phone != phone {
+			response_writer.JsonMessageResponse(w, "Номер телефона не авторизован", http.StatusUnauthorized)
+			return
+		}
+	} else {
 		response_writer.JsonMessageResponse(w, "Номер телефона не авторизован", http.StatusUnauthorized)
 		return
 	}
@@ -121,14 +127,18 @@ func CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
 func GetOrdersHandler(w http.ResponseWriter, r *http.Request) {
 
 	sess, _ := session.GetSession(r)
-	phoneSession := sess.Values["auth"].(services.PhoneSession)
+	auth := sess.Values["auth"]
+	var phoneSession services.PhoneSession
 
-	if !phoneSession.Confirmed {
+	if auth != nil {
+		if phoneSession = auth.(services.PhoneSession); !phoneSession.Confirmed {
+			response_writer.JsonMessageResponse(w, "Сессия не активна", 401)
+			return
+		}
+	} else {
 		response_writer.JsonMessageResponse(w, "Сессия не активна", 401)
 		return
 	}
-
-	log.Println(phoneSession.Phone)
 
 	var orders = &[]db.Order{}
 	err := db.Connection.Order("created_at desc").Where(&db.Order{Phone: phoneSession.Phone}).Find(orders).Error

@@ -2,8 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css"
-          integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
     <link href="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.min.css" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
     <link rel="icon" type="image/png" href="/public/favicon.ico"/>
@@ -40,6 +39,18 @@
 </template>
 
 <template id="tpl_header">
+    <v-toolbar color="primary">
+        <v-toolbar-title>Title</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-toolbar-items class="hidden-sm-and-down">
+            <v-btn flat :to="{ name: 'home' }">Сделать заказ</v-btn>
+            <v-btn flat :to="{ name: 'orders' }">Мои заказы</v-btn>
+            <v-btn flat :to="{ name: 'about_us' }">О нас</v-btn>
+        </v-toolbar-items>
+    </v-toolbar>
+</template>
+
+<template>
     <v-jumbotron :gradient="gradient" dark src="https://cdn.vuetifyjs.com/images/parallax/material2.jpg" height="150px">
         <v-container fill-height>
             <v-layout align-center>
